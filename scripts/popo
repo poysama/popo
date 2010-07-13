@@ -6,30 +6,57 @@ require 'logger'
 
 POPO_GIT_REPO = "git@git.caresharing.eu:utilities/popo"
 POPO_WORK_PATH = ".popo"
-COMMANDS = %w{ init clean }
+COMMANDS = %w{ init wipe }
+GIT_CMD = `which git`.strip
+DEFAULT_MANIFEST = 'development'
 
 l = LOGGER = Logger.new($stdout)
 l.level = Logger::DEBUG
 
 module Popo
-  def self.init(root_path)
+  def self.l; LOGGER; end
+
+  def self.wipe(root_path, argv = [ ])
+    cmd = "rm -Rf * #{POPO_WORK_PATH}"
+    docmd(cmd)
+  end
+
+  def self.init(root_path, argv = [ ])
+    manifest = argv[1] || DEFAULT_MANIFEST
+    l.debug { "Cloning popo from #{POPO_GIT_REPO} for #{manifest} manifest" }
+
+    cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{POPO_WORK_PATH}"
+    docmd(cmd)
   end
 
   def self.proxy_cmd(root_path)
   end
 
-  def self.l; LOGGER; end
-  def require_relative_work_environment(root_path)
-    popo_work_path = File.join(root_path, POPO_WORK_PATH)
+  def self.require_relative_work_popo(root_path)
+    popo_work_path = File.expand_path(File.join(root_path, POPO_WORK_PATH))
+    require File.join(popo_work_path, 'lib/popo')
+  end
+
+  def self.docmd(cmd)
+    l.debug { "`#{cmd}`" }
+    system(cmd)
+  end
+
+  def self.in_popo?(root_path)
+    popo_work_path = File.expand_path(File.join(root_path, POPO_WORK_PATH))
     if File.exists?(popo_work_path)
+      popo_work_path
     else
-      raise "#{popo_work_path} do not exists"
+      nil
     end
   end
 end
 
 root_path = Dir.pwd
-l.debug "Working path: #{root_path}"
+begin
+  Popo.require_relative_work_popo(root_path) if Popo.in_popo?(root_path)
+rescue LoadError
+end
 
 opts = OpenStruct.new
 opts_parse = OptionParser.new do |o|
@@ -46,7 +73,18 @@ case command
 when nil, ''
   puts opts_parse.help
 when 'init'
-  Popo.init(root_path)
+  Popo.init(root_path, ARGV)
 else
-  puts opts_parse.help
+  if Popo.in_popo?(root_path)
+    l.debug "Working path: #{root_path}"
+
+    case command
+    when 'wipe'
+      Popo.wipe(root_path, ARGV)
+    else
+      Popo.proxy_commands(root_path, opts, opts_parse, ARGV)
+    end
+  else
+    $stderr.puts "You don't seem to be in a popoized directory. Perhaps popo init first? Aborting."
+  end
 end
