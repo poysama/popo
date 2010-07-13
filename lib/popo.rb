@@ -30,5 +30,7 @@ module Popo
   end
 
   def self.status(root_path)
+    puts "Gathering status info, please be patient, this can take a while on a pathetic machine..."
+    $stdout.flush
   end
 end
