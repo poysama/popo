@@ -3,18 +3,47 @@
 require 'optparse'
 require 'ostruct'
 require 'logger'
+require 'yaml'
 
 POPO_GIT_REPO = "git@git.caresharing.eu:utilities/popo"
 POPO_WORK_PATH = ".popo"
+POPO_YML_FILE = "popo.yml"
+POPO_CONFIG = { }
 COMMANDS = %w{ init wipe }
 GIT_CMD = `which git`.strip
-DEFAULT_MANIFEST = 'development'
+DEFAULT_TARGET = 'development'
 
 l = LOGGER = Logger.new($stdout)
-l.level = Logger::DEBUG
+l.level = Logger::INFO
 
 module Popo
+  def self.check_requirements!
+    if GIT_CMD.nil? || GIT_CMD.empty?
+      fail_exit "Can\'t find \`git\` from your path. Perhaps you need to install it?"
+    end
+  end
+
   def self.l; LOGGER; end
+  def self.fail_exit(m); $stderr.puts(m); exit(-1); end
+
+  def self.require_relative_work_popo(root_path)
+    popo_work_path = File.expand_path(File.join(root_path, POPO_WORK_PATH))
+    require File.join(popo_work_path, 'lib/popo')
+
+    popo_yml = File.expand_path(File.join(root_path, POPO_WORK_PATH, POPO_YML_FILE))
+    if File.exists?(popo_yml)
+      popo_config = YAML.load_file(popo_yml)
+      if popo_config.is_a?(Hash)
+        POPO_CONFIG.update(popo_config)
+      else
+        fail_exit "#{POPO_WORK_PATH}/#{POPO_YML_FILE} seems to be wrong"
+      end
+    else
+      fail_exit "Found a popo working path, but no valid #{POPO_YML_FILE} config file"
+    end
+
+    Popo.check_extended_requirements!
+  end
 
   def self.wipe(root_path, argv = [ ])
     cmd = "rm -Rf * #{POPO_WORK_PATH}"
@@ -22,19 +51,24 @@ module Popo
   end
 
   def self.init(root_path, argv = [ ])
-    manifest = argv[1] || DEFAULT_MANIFEST
-    l.debug { "Cloning popo from #{POPO_GIT_REPO} for #{manifest} manifest" }
+    if in_popo?(root_path)
+      fail_exit "Already initialized popo directory. Perhaps a different task bozo."
+    end
+
+    target = argv[1] || DEFAULT_TARGET
+    l.debug { "Cloning popo from #{POPO_GIT_REPO} for #{target} target" }
 
     cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{POPO_WORK_PATH}"
     docmd(cmd)
-  end
 
-  def self.proxy_cmd(root_path)
-  end
+    # -> configure popo.yml
+    popo_defaults_yml = File.expand_path(File.join(root_path, POPO_WORK_PATH, 'popo-defaults.yml'))
+    popo_config = File.read(popo_defaults_yml)
+    popo_config.gsub!("%target%", target)
 
-  def self.require_relative_work_popo(root_path)
-    popo_work_path = File.expand_path(File.join(root_path, POPO_WORK_PATH))
-    require File.join(popo_work_path, 'lib/popo')
+    popo_yml = File.expand_path(File.join(root_path, POPO_WORK_PATH, 'popo.yml'))
+    File.open(popo_yml, 'w') { |f| f.write(popo_config) }
+    puts "Written #{File.basename(popo_yml)}"
   end
 
   def self.docmd(cmd)
@@ -53,6 +87,7 @@ module Popo
 end
 
 root_path = Dir.pwd
+Popo.check_requirements!
 begin
   Popo.require_relative_work_popo(root_path) if Popo.in_popo?(root_path)
 rescue LoadError
@@ -77,12 +112,11 @@ when 'init'
 else
   if Popo.in_popo?(root_path)
     l.debug "Working path: #{root_path}"
-
     case command
     when 'wipe'
       Popo.wipe(root_path, ARGV)
     else
-      Popo.proxy_commands(root_path, opts, opts_parse, ARGV)
+      Popo.commands(root_path, opts, opts_parse, ARGV)
     end
   else
     $stderr.puts "You don't seem to be in a popoized directory. Perhaps popo init first? Aborting."
