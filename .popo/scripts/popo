@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'ostruct'
+require 'logger'
+
+POPO_GIT_REPO = "git@git.caresharing.eu:utilities/popo"
+POPO_WORK_PATH = ".popo"
+COMMANDS = %w{ init clean }
+
+l = LOGGER = Logger.new($stdout)
+l.level = Logger::DEBUG
+
+module Popo
+  def self.init(root_path)
+  end
+
+  def self.proxy_cmd(root_path)
+  end
+
+  def self.l; LOGGER; end
+  def require_relative_work_environment(root_path)
+    popo_work_path = File.join(root_path, POPO_WORK_PATH)
+    if File.exists?(popo_work_path)
+    else
+      raise "#{popo_work_path} do not exists"
+    end
+  end
+end
+
+root_path = Dir.pwd
+l.debug "Working path: #{root_path}"
+
+opts = OpenStruct.new
+opts_parse = OptionParser.new do |o|
+  o.banner = "Popo command utility\n" +
+    "  Usage: popo command [options]\n" +
+    "  Commands: #{COMMANDS.join(' ')}"
+
+  o.separator ""
+end
+opts_parse.parse!(ARGV)
+
+command = ARGV[0]
+case command
+when nil, ''
+  puts opts_parse.help
+when 'init'
+  Popo.init(root_path)
+else
+  puts opts_parse.help
+end
