@@ -1,0 +1,32 @@
+# these two just loads the default bashrc files that bash normally loads
+# the following lines disabled the loading of rvm, if one exists in the user's .bashrc
+unset rvm_loaded_flag
+rvm_loaded_flag=1
+
+if [[ -f /etc/bash.bashrc ]] ; then
+    source /etc/bash.bashrc
+fi
+
+if [[ -f $HOME/.bashrc ]] ; then
+    source $HOME/.bashrc
+fi
+
+export PS1="(popo $popo_target) $PS1"
+export PATH="$popo_path/tools:$PATH"
+export rvm_prefix=$popo_path
+export rvm_path=$popo_path/rvm
+export rvm_scripts_path=$rvm_path/scripts
+
+# now let's load rvm code, making sure ours load properly
+unset rvm_loaded_flag
+source $rvm_scripts_path/rvm
+
+echo ""
+echo "Welcome to the popoed bash environment, where you can play with your very own popo."
+echo ""
+echo "  popo target: $popo_target"
+echo "  popo path: $popo_path"
+echo ""
+echo "Remember to keep things clean and civil around here."
+echo "To go back to your normal world, just hit exit."
+echo ""
