@@ -1,5 +1,5 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash info status sync }
+COMMANDS.concat %w{ bash rvm info status sync }
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -16,7 +16,10 @@ module Popo
       Popo.status(root_path)
     when 'bash'
       Popo.bash(root_path)
+    when 'rvm'
+      Popo.rvm(root_path, argv)
     else
+      puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
     end
   end
@@ -51,6 +54,23 @@ module Popo
 
     target = POPO_CONFIG['target']
     bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{BASH_BIN} --rcfile #{File.join(root_path, POPO_WORK_PATH, POPORC)}"
+    exec(bashcmd)
+  end
+
+  def self.rvm(root_path, argv)
+    if ENV_BIN.nil? || ENV_BIN.empty?
+      fail_exit! "FAIL env is nowhere to be found"
+    end
+
+    target = POPO_CONFIG['target']
+    poporc_path = File.join(root_path, POPO_WORK_PATH, POPORC)
+
+    if argv.size > 1
+      bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{poporc_path} #{argv[1..-1].join(' ')}"
+    else
+      bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{poporc_path}"
+    end
+
     exec(bashcmd)
   end
 end

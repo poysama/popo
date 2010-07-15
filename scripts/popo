@@ -101,22 +101,24 @@ opts_parse = OptionParser.new do |o|
 
   o.separator ""
 end
-opts_parse.parse!(ARGV)
 
-command = ARGV[0]
+argv = ARGV.dup
+opts_parse.parse!(argv)
+
+command = argv[0]
 case command
 when nil, ''
   puts opts_parse.help
 when 'init'
-  Popo.init(root_path, ARGV)
+  Popo.init(root_path, argv)
 else
   if Popo.in_popo?(root_path)
     l.debug "Working path: #{root_path}"
     case command
     when 'wipe'
-      Popo.wipe(root_path, ARGV)
+      Popo.wipe(root_path, argv)
     else
-      Popo.commands(root_path, opts, opts_parse, ARGV)
+      Popo.commands(root_path, opts, opts_parse, argv)
     end
   else
     $stderr.puts "You don't seem to be in a popoized directory. Perhaps popo init first? Aborting."
