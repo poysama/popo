@@ -5,13 +5,16 @@ require 'ostruct'
 require 'logger'
 require 'yaml'
 
-POPO_GIT_REPO = "git@git.caresharing.eu:utilities/popo"
+POPO_GIT_REPO = "git@git.caresharing.eu:popo/popo"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
 POPO_CONFIG = { }
 COMMANDS = %w{ init wipe }
+VALID_TARGETS = [ 'staging', 'beta', 'development', 'production' ]
 GIT_CMD = `which git`.strip
 DEFAULT_TARGET = 'development'
+RVM_GIT_REPO = "git@git.caresharing.eu:popo/rvm"
+TOOLS_GIT_REPO = "git@git.caresharing.eu:popo/tools"
 
 l = LOGGER = Logger.new($stdout)
 l.level = Logger::INFO
@@ -56,19 +59,57 @@ module Popo
     end
 
     target = argv[1] || DEFAULT_TARGET
+    puts target
+    if not VALID_TARGETS.include? target
+      fail_exit "You might want to specify a valid target."
+    end
+    
     l.debug { "Cloning popo from #{POPO_GIT_REPO} for #{target} target" }
 
-    cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{POPO_WORK_PATH}"
+    cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{target}/#{POPO_WORK_PATH}"
     docmd(cmd)
 
     # -> configure popo.yml
-    popo_defaults_yml = File.expand_path(File.join(root_path, POPO_WORK_PATH, 'popo-defaults.yml'))
+    popo_defaults_yml = File.expand_path(File.join(root_path, target, POPO_WORK_PATH, 'popo-defaults.yml'))
     popo_config = File.read(popo_defaults_yml)
     popo_config.gsub!("%target%", target)
 
-    popo_yml = File.expand_path(File.join(root_path, POPO_WORK_PATH, 'popo.yml'))
+    popo_yml = File.expand_path(File.join(root_path, target, POPO_WORK_PATH, 'popo.yml'))
     File.open(popo_yml, 'w') { |f| f.write(popo_config) }
     puts "Written #{File.basename(popo_yml)}"
+
+    # clone tools
+    puts "Deploying handy tools..."
+    cmd = "#{GIT_CMD} clone #{TOOLS_GIT_REPO} #{target}/tools"
+    docmd(cmd)
+    puts "Handy tools at your service."
+    
+    # clone rvm
+    puts "Deploying RVM...."
+    cmd = "#{GIT_CMD} clone #{RVM_GIT_REPO} #{target}/rvm"
+    docmd(cmd)
+
+    # create apps directory
+    puts "Creating apps directory"
+    Dir.mkdir("#{target}/apps")
+
+    Dir.chdir(target)
+    
+    # deploy ruby versions using rvm
+    puts "Installing ree-1.8.7...Patiently wait."
+    cmd = "popo rvm install ree-1.8.7"
+    docmd(cmd)
+
+    docmd("popo bash")
+    
+    
+    # deploy gems for rvm
+    # ree-1.8.7 currently supported
+    #puts "Cutting the gems. This will take long. Go watch a movie or something"
+    #cmd = ""
+    #docmd(cmd)
+    #puts ""
+
   end
 
   def self.docmd(cmd)

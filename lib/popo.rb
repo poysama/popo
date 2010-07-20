@@ -1,5 +1,5 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash rvm info status sync }
+COMMANDS.concat %w{ bash rvm info status sync gems }
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -18,6 +18,8 @@ module Popo
       Popo.bash(root_path)
     when 'rvm'
       Popo.rvm(root_path, argv)
+    when 'gems'
+      Popo.gems
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
@@ -71,6 +73,23 @@ module Popo
       bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{poporc_path}"
     end
 
-    exec(bashcmd)
+    (bashcmd)
+  end
+
+  def self.gems
+    POPO_CONFIG['gems'].each do |gem|
+      gem.each do |gem_name, ver|
+        tmp = []
+        if ver.is_a? Array
+          tmp = ver
+        else
+          tmp << ver
+        end
+        tmp.each do |ver2|
+          system "gem install #{gem_name} -v #{ver2} --source http://gems.caresharing.eu --no-ri --no-rdoc"
+        end
+      end
+    end
   end
 end
+
