@@ -4,6 +4,7 @@ COMMANDS.concat %w{ bash rvm info status sync gems }
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
+GIT_REPO = 'git@git.caresharing.eu'
 
 module Popo
   def self.commands(root_path, opts, opts_parse, argv = [ ])
@@ -72,8 +73,7 @@ module Popo
     else
       bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{poporc_path}"
     end
-
-    (bashcmd)
+    exec(bashcmd)
   end
 
   def self.gems
@@ -89,6 +89,12 @@ module Popo
           system "gem install #{gem_name} -v #{ver2} --source http://gems.caresharing.eu --no-ri --no-rdoc"
         end
       end
+    end
+  end
+
+  def self.palmade
+    POPO_CONFIG['palmade']['gems'].each do |gem|
+      
     end
   end
 end
