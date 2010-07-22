@@ -36,7 +36,7 @@ applications:
         - 127.0.0.1:20101
       servers: 1
       tail: false
-      tag: development 
+      tag: %target% 
     host_config:
       exception_notify: false
     camp:
@@ -49,7 +49,7 @@ applications:
         - 127.0.0.1:20201
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     host_config:
       exception_notify: false
     camp:
@@ -74,7 +74,7 @@ applications:
         - 127.0.0.1:20301
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     host_config:
       exception_notify: false
     camp:
@@ -87,7 +87,7 @@ applications:
         - 127.0.0.1:20501
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     host_config:
       exception_notify: false
     camp:
@@ -100,7 +100,7 @@ applications:
         - 127.0.0.1:20601
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     host_config:
       exception_notify: false
     camp:
@@ -114,7 +114,7 @@ applications:
         - 127.0.0.1:20401
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     camp:
       server: 127.0.0.1:1980
     host_config:
@@ -127,7 +127,7 @@ applications:
         - 127.0.0.1:20410
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     camp:
       server: 127.0.0.1:1980
     host_config:
@@ -140,7 +140,7 @@ applications:
         - 127.0.0.1:20701
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     camp:
       server: 127.0.0.1:1980
     host_config:
@@ -153,7 +153,7 @@ applications:
         - 127.0.0.1:21201
       servers: 1
       tail: false
-      tag: development
+      tag: %target%
     camp:
       server: 127.0.0.1:1980
     host_config:
