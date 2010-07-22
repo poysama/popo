@@ -1,0 +1,160 @@
+# store as <app_dir>/config/cabling.yml
+# or ~/.cabling.yml
+# or /etc/cabling.yml
+# set ENV variable env CABLING_PATH=<some_path_to_cabling/cabling.yml
+
+globals:
+  mysql: 
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: some_serious_password
+    encoding: utf8
+    pool: 5
+
+  cactsing:
+    redis_server: 127.0.0.1:6379
+    
+  analogger:
+    enable: true
+    #key: 81hdkljb128h
+    key: some_serious_key
+    host: 127.0.0.1
+    port: 19070
+
+  mogilicious:
+    host: 127.0.0.1:6001
+
+  caresharing:
+    sites: [diabetescirkel, gho, ghogo, hagroweert, hznk, meditta, omnihis, roha, rohwn, whc]
+
+applications:
+  account:
+    environment: development
+    appctl:
+      listen: 
+        - 127.0.0.1:20101
+      servers: 1
+      tail: false
+      tag: development 
+    host_config:
+      exception_notify: false
+    camp:
+      server: 127.0.0.1:1980
+
+  base:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20201
+      servers: 1
+      tail: false
+      tag: development
+    host_config:
+      exception_notify: false
+    camp:
+      server: 127.0.0.1:1980
+
+  base2:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20201
+    campout:
+      listen:
+        - 127.0.0.1:1980
+        - 127.0.0.1:1981
+        - 127.0.0.1:1982
+        - 127.0.0.1:1983
+
+  chronic:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20301
+      servers: 1
+      tail: false
+      tag: development
+    host_config:
+      exception_notify: false
+    camp:
+      server: 127.0.0.1:1980
+
+  clinic:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20501
+      servers: 1
+      tail: false
+      tag: development
+    host_config:
+      exception_notify: false
+    camp:
+      server: 127.0.0.1:1980
+
+  fundus:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20601
+      servers: 1
+      tail: false
+      tag: development
+    host_config:
+      exception_notify: false
+    camp:
+      server: 127.0.0.1:1980
+
+  group:
+    environment: development
+
+    appctl:
+      listen:
+        - 127.0.0.1:20401
+      servers: 1
+      tail: false
+      tag: development
+    camp:
+      server: 127.0.0.1:1980
+    host_config:
+      exception_notify: false
+
+  group2:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20410
+      servers: 1
+      tail: false
+      tag: development
+    camp:
+      server: 127.0.0.1:1980
+    host_config:
+      exception_notify: false
+
+  ptlist:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:20701
+      servers: 1
+      tail: false
+      tag: development
+    camp:
+      server: 127.0.0.1:1980
+    host_config:
+      exception_notify: false
+
+  patient:
+    environment: development
+    appctl:
+      listen:
+        - 127.0.0.1:21201
+      servers: 1
+      tail: false
+      tag: development
+    camp:
+      server: 127.0.0.1:1980
+    host_config:
+      exception_notify: false
