@@ -1,10 +1,11 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash rvm info status sync gems }
+COMMANDS.concat %w{ bash rvm info status sync gems frameworks plugins apps nuke}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
 GIT_REPO = 'git@git.caresharing.eu'
+CARESHARING_APPS = [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist' ]
 
 module Popo
   def self.commands(root_path, opts, opts_parse, argv = [ ])
@@ -21,6 +22,16 @@ module Popo
       Popo.rvm(root_path, argv)
     when 'gems'
       Popo.gems
+    when 'frameworks'
+      Popo.frameworks
+    when 'plugins'
+      Popo.plugins
+    when 'apps'
+      Popo.apps
+    when 'nuke'
+      Popo.apps
+      Popo.frameworks
+      Popo.plugins
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
@@ -92,9 +103,21 @@ module Popo
     end
   end
 
-  def self.palmade
-    POPO_CONFIG['palmade']['gems'].each do |gem|
-      
+  def self.frameworks
+    POPO_CONFIG['palmade']['gems'].each do |gem, branch|
+      system("git clone #{GIT_REPO}:gems/#{gem} frameworks/#{gem}")
+    end
+  end
+
+  def self.plugins
+    POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
+      system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"  
+    end
+  end
+
+  def self.apps
+    CARESHARING_APPS.each do |app|
+      system "git clone #{GIT_REPO}:caresharing/#{app} apps/#{app}"
     end
   end
 end
