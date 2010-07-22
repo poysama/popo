@@ -1,5 +1,5 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash rvm info status sync gems frameworks plugins apps nuke}
+COMMANDS.concat %w{ bash rvm info status sync gems frameworks plugins apps nuke cable}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -28,10 +28,13 @@ module Popo
       Popo.plugins
     when 'apps'
       Popo.apps
+    when 'cable'
+      Popo.cable
     when 'nuke'
       Popo.apps
       Popo.frameworks
       Popo.plugins
+      Popo.cable
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
@@ -118,6 +121,16 @@ module Popo
   def self.apps
     CARESHARING_APPS.each do |app|
       system "git clone #{GIT_REPO}:caresharing/#{app} apps/#{app}"
+    end
+  end
+
+  def self.cable
+    CARESHARING_APPS.each do |app|
+      Dir.chdir("apps/#{app}") { |p|
+        puts "Cabling #{app}....."
+        sleep(1)
+        system("cableguy")
+      }
     end
   end
 end
