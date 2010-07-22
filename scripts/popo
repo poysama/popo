@@ -4,17 +4,19 @@ require 'optparse'
 require 'ostruct'
 require 'logger'
 require 'yaml'
+require 'fileutils'
 
 POPO_GIT_REPO = "git@git.caresharing.eu:popo/popo"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
 POPO_CONFIG = { }
 COMMANDS = %w{ init wipe }
-VALID_TARGETS = [ 'staging', 'beta', 'development', 'production' ]
+VALID_TARGETS = [ 'staging', 'beta', 'development', 'production', 'test' ]
 GIT_CMD = `which git`.strip
 DEFAULT_TARGET = 'development'
 RVM_GIT_REPO = "git@git.caresharing.eu:popo/rvm"
 TOOLS_GIT_REPO = "git@git.caresharing.eu:popo/tools"
+SRC_TREE = [ 'apps', 'frameworks', 'plugins', 'helpers', 'external', 'configs', 'out/logs', 'out/pids', 'out/caches' ]
 
 l = LOGGER = Logger.new($stdout)
 l.level = Logger::INFO
@@ -59,7 +61,6 @@ module Popo
     end
 
     target = argv[1] || DEFAULT_TARGET
-    puts target
     if not VALID_TARGETS.include? target
       fail_exit "You might want to specify a valid target."
     end
@@ -69,49 +70,45 @@ module Popo
     cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{target}/#{POPO_WORK_PATH}"
     docmd(cmd)
 
-    # -> configure popo.yml
-    popo_defaults_yml = File.expand_path(File.join(root_path, target, POPO_WORK_PATH, 'popo-defaults.yml'))
-    popo_config = File.read(popo_defaults_yml)
-    popo_config.gsub!("%target%", target)
-
-    popo_yml = File.expand_path(File.join(root_path, target, POPO_WORK_PATH, 'popo.yml'))
-    File.open(popo_yml, 'w') { |f| f.write(popo_config) }
-    puts "Written #{File.basename(popo_yml)}"
-
+    # write cabling.yml and popo.yml
+    yml_write(root_path, target, 'cabling')
+    yml_write(root_path, target, 'popo')
+    
     # clone tools
     puts "Deploying handy tools..."
     cmd = "#{GIT_CMD} clone #{TOOLS_GIT_REPO} #{target}/tools"
     docmd(cmd)
-    puts "Handy tools at your service."
     
     # clone rvm
-    puts "Deploying RVM...."
+    puts "RVM, making your ruby life easier...."
     cmd = "#{GIT_CMD} clone #{RVM_GIT_REPO} #{target}/rvm"
     docmd(cmd)
 
-    # create apps directory
-    puts "Creating apps directory"
-    Dir.mkdir("#{target}/apps")
-
-    Dir.chdir(target)
+    puts "Building additional branches for your tree..."
+    SRC_TREE.each do |tree|
+      puts FileUtils::mkdir_p("#{target}/#{tree}")
+    end
     
-    # deploy ruby versions using rvm
-    puts "Installing ree-1.8.7...Patiently wait."
-    cmd = "popo rvm install ree-1.8.7"
-    docmd(cmd)
-
-    docmd("popo bash")
-    
-    
-    # deploy gems for rvm
-    # ree-1.8.7 currently supported
-    #puts "Cutting the gems. This will take long. Go watch a movie or something"
-    #cmd = ""
-    #docmd(cmd)
-    #puts ""
-
+    Dir.chdir("/opt/palmade/#{target}") { |p|
+      # install stable rvm package
+      puts "Installing ree-1.8.7...Patiently wait."
+      cmd = "popo rvm install ree-1.8.7"
+      exec(cmd)
+    }  
   end
 
+  # this takes care of writing the yaml files needed
+  def self.yml_write(root_path, target, name)
+    default_yml = File.expand_path(File.join(root_path, target, POPO_WORK_PATH, "#{name}-defaults.yml"))
+    default_config = File.read(default_yml)
+    default_config.gsub!("%target%", target)
+
+    name_yml = File.expand_path(File.join(root_path, target, POPO_WORK_PATH, "#{name}.yml"))
+    File.open(name_yml, 'w') { |f| f.write(default_config) }
+    puts "Written #{File.basename(name_yml)}"
+  end
+
+  
   def self.docmd(cmd)
     l.debug { "`#{cmd}`" }
     system(cmd)
