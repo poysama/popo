@@ -24,9 +24,24 @@ globals:
 
   mogilicious:
     host: 127.0.0.1:6001
+    front:
+      hosts:
+    stored:
+      hosts:
 
   caresharing:
     sites: [diabetescirkel, gho, ghogo, hagroweert, hznk, meditta, omnihis, roha, rohwn, whc]
+    protocol: http
+    domain: local
+    apps:
+      account: account
+      base: base
+      chronic: chronische-zorg
+      clinic: praktijk
+      group: zorggroep
+      fundus: fundus
+      ptlist: chronische-zorg-lite
+      patient: patient
 
 applications:
   account:
