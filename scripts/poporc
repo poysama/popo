@@ -30,7 +30,8 @@ fi
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
 export rvm_prefix=$popo_path
 export rvm_path=$popo_path/rvm
-#Temp fix
+
+# Set environment variables when they are already set by system install of rvm
 export rvm_scripts_path=$rvm_path/scripts
 export rvm_archives_path=$rvm_path/archives
 export rvm_src_path=$rvm_path/src
@@ -53,8 +54,11 @@ export rvm_repo_path=$rvm_path/repos
 unset rvm_loaded_flag
 source $rvm_scripts_path/rvm
 
+# Load default rvm
+rvm default 1>/dev/null 2>&1
+
 if [[ -z "$PS1" ]] ; then
-    rvm $*
+	rvm $*
 else
     echo ""
     echo "Welcome to the popoed bash environment, where you can play with your very own popo."
