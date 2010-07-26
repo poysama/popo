@@ -5,7 +5,6 @@ BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
 GIT_REPO = 'git@git.caresharing.eu'
-CARESHARING_APPS = [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist' ]
 
 module Popo
   def self.commands(root_path, opts, opts_parse, argv = [ ])
@@ -119,13 +118,13 @@ module Popo
   end
 
   def self.apps
-    CARESHARING_APPS.each do |app|
+    POPO_CONFIG['caresharing']['apps'].each do |app|
       system "git clone #{GIT_REPO}:caresharing/#{app} apps/#{app}"
     end
   end
 
   def self.cable
-    CARESHARING_APPS.each do |app|
+    POPO_CONFIG['caresharing']['apps'].each do |app|
       Dir.chdir("apps/#{app}") { |p|
         puts "Cabling #{app}....."
         sleep(1)

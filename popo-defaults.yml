@@ -1,5 +1,9 @@
 target: %target%
 
+caresharing:
+  sites:
+  apps: [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist' ]
+
 gems:
   - rake: 0.8.7
   - activesupport: [1.4.4, 2.3.2, 2.3.4]
