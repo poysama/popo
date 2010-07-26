@@ -70,9 +70,10 @@ module Popo
     cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{target}/#{POPO_WORK_PATH}"
     docmd(cmd)
 
-    # write cabling.yml and popo.yml
+    # write default configuration files
     yml_write(root_path, target, 'cabling')
     yml_write(root_path, target, 'popo')
+    yml_write(root_path, target, 'dbget')
     
     # clone tools
     puts "Deploying handy tools..."

@@ -1,0 +1,3 @@
+backups:
+  host: hyperion.caresharing
+  path: /backups/db/mirana
