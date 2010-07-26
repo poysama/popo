@@ -29,10 +29,22 @@ globals:
     stored:
       hosts:
 
+  # information here will be used for caresharing_site.yml in base and base2 apps and database.yml
   caresharing:
     sites: [diabetescirkel, gho, ghogo, hagroweert, hznk, meditta, omnihis, roha, rohwn, whc]
+  # protocol - available options http for port 80 and https for 443
     protocol: http
+  # domain
+  # suggested:
+  # local - for development
+  # <target>.caresharing - for LOCAL staging, beta sites
+  # <target>.caresharing.eu - for LIVE staging, beta sites
+  # caresharing.eu - for LIVE site
     domain: local
+
+  # this is app and host relationship
+  # format is <app_name>: <host_name_for_app>
+  # for development purposes, <app_name> == <host_name_for_app> otherwise, follow defaults below
     apps:
       account: account
       base: base
@@ -44,8 +56,11 @@ globals:
       patient: patient
 
 applications:
+  # app name
   account:
+  # environment is different from target. environment is rails wise
     environment: development
+  # puppet master configurations
     appctl:
       listen: 
         - 127.0.0.1:20101
@@ -54,6 +69,7 @@ applications:
       tag: %target% 
     host_config:
       exception_notify: false
+  # settings for caresharing.yml - app to base2 connection
     camp:
       server: 127.0.0.1:1980
 
