@@ -97,7 +97,7 @@ module Popo
       exec(cmd)
 
 			# set ree as rvm default
-			exec("popo rvm default ree-1.8.7")
+			exec("popo rvm --default ree-1.8.7")
     }  
   end
 
@@ -138,14 +138,13 @@ end
 opts = OpenStruct.new
 opts_parse = OptionParser.new do |o|
   o.banner = "Popo command utility\n" +
-    "  Usage: popo command [options]\n" +
+    "  Usage: popo command\n" +
     "  Commands: #{COMMANDS.join(' ')}"
 
   o.separator ""
 end
 
 argv = ARGV.dup
-opts_parse.parse!(argv)
 
 command = argv[0]
 case command
