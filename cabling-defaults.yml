@@ -24,10 +24,25 @@ globals:
 
   mogilicious:
     host: 127.0.0.1:6001
-    front:
-      hosts:
-    stored:
-      hosts:
+    # To be used for deployments of mogilicious_frontd and mogilicious_stored services
+    server: 
+      data_path: public
+      frontd:
+        listen:
+          - 127.0.0.1:49301
+        pid_file: tmp/mogilicious_frontd.pid
+        log_file: log/mogilicious_frontd.log
+        servers: 3
+      stored:
+        dav:
+          listen:
+            - 127.0.0.1:7500
+        side:
+          listen:
+            - 127.0.0.1:7501
+        pid_file: tmp/mogilicious_stored.pid
+        log_file: log/mogilicious_stored.log
+        servers: 2
 
   # information here will be used for caresharing_site.yml in base and base2 apps and database.yml
   caresharing:
@@ -189,3 +204,6 @@ applications:
       server: 127.0.0.1:1980
     host_config:
       exception_notify: false
+
+  files:
+    environment: development
