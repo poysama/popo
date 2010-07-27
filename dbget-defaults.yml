@@ -1,3 +1,6 @@
 backups:
   host: hyperion.caresharing
   path: /backups/db/mirana
+
+openssl:
+  passphrase: OCBjc87WsPpjPLW4WkYuWPBiLbJd5emfnZvyc5P1T9F4NnQ0UoYl2i9SJZbPQx9V
