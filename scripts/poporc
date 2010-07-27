@@ -55,7 +55,7 @@ unset rvm_loaded_flag
 source $rvm_scripts_path/rvm
 
 # Load default rvm
- rvm default 1>/dev/null 2>&1
+rvm default 1>/dev/null 2>&1
 
 if [[ -z "$PS1" ]] ; then
 	rvm $*
