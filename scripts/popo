@@ -94,10 +94,11 @@ module Popo
       # install stable rvm package
       puts "Installing ree-1.8.7...Patiently wait."
       cmd = "popo rvm install ree-1.8.7"
-      exec(cmd)
+      docmd(cmd)
 
-			# set ree as rvm default
-			exec("popo rvm --default ree-1.8.7")
+      # set ree as rvm default
+      puts Dir.pwd
+      docmd("popo rvm --default ree-1.8.7")
     }  
   end
 
