@@ -70,6 +70,8 @@ gems:
   - actionmailer: 2.3.8
   - activeresource: 2.3.8
   - rails: 2.3.8
+  - net-sftp: 2.0.4
+  - net-ssh: 2.0.23
 
 palmade:
   gems:
