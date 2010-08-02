@@ -1,8 +1,10 @@
 target: %target%
 
+git: git@git.caresharing.eu
+
 caresharing:
   sites:
-  apps: [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist' ]
+  apps: [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist', 'console' ]
 
 gems:
   - rake: 0.8.7

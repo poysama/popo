@@ -207,3 +207,8 @@ applications:
 
   files:
     environment: development
+  
+  console:
+    environment: development
+    camp:
+      server: 127.0.0.1:1980
