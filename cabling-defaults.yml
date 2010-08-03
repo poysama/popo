@@ -4,6 +4,7 @@
 # set ENV variable env CABLING_PATH=<some_path_to_cabling/cabling.yml
 
 globals:
+  environment: production
   mysql: 
     host: 127.0.0.1
     port: 3306
@@ -73,8 +74,6 @@ globals:
 applications:
   # app name
   account:
-  # environment is different from target. environment is rails wise
-    environment: development
   # puppet master configurations
     appctl:
       listen: 
@@ -89,7 +88,6 @@ applications:
       server: 127.0.0.1:1980
 
   base:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20201
@@ -102,7 +100,6 @@ applications:
       server: 127.0.0.1:1980
 
   base2:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20201
@@ -114,7 +111,6 @@ applications:
         - 127.0.0.1:1983
 
   chronic:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20301
@@ -127,7 +123,6 @@ applications:
       server: 127.0.0.1:1980
 
   clinic:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20501
@@ -140,7 +135,6 @@ applications:
       server: 127.0.0.1:1980
 
   fundus:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20601
@@ -153,8 +147,6 @@ applications:
       server: 127.0.0.1:1980
 
   group:
-    environment: development
-
     appctl:
       listen:
         - 127.0.0.1:20401
@@ -167,7 +159,6 @@ applications:
       exception_notify: false
 
   group2:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20410
@@ -180,7 +171,6 @@ applications:
       exception_notify: false
 
   ptlist:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:20701
@@ -206,9 +196,7 @@ applications:
       exception_notify: false
 
   files:
-    environment: development
   
   console:
-    environment: development
     camp:
       server: 127.0.0.1:1980
