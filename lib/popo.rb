@@ -1,5 +1,5 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash rvm info status sync gems frameworks plugins apps nuke cable}
+COMMANDS.concat %w{ bash rvm info status sync install_gems install_frameworks install_plugins install_apps cable nuke}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -19,17 +19,18 @@ module Popo
       Popo.bash(root_path)
     when 'rvm'
       Popo.rvm(root_path, argv)
-    when 'gems'
+    when 'install_gems'
       Popo.gems
-    when 'frameworks'
+    when 'install_frameworks'
       Popo.frameworks
-    when 'plugins'
+    when 'install_plugins'
       Popo.plugins
-    when 'apps'
+    when 'install_apps'
       Popo.apps
     when 'cable'
       Popo.cable
     when 'nuke'
+      print "=== The Ultimate Combo! ==="
       Popo.apps
       Popo.frameworks
       Popo.plugins
@@ -89,7 +90,7 @@ module Popo
     exec(bashcmd)
   end
 
-  def self.gems
+  def self.install_gems
     POPO_CONFIG['gems'].each do |gem|
       gem.each do |gem_name, ver|
         tmp = []
@@ -105,19 +106,19 @@ module Popo
     end
   end
 
-  def self.frameworks
+  def self.install_frameworks
     POPO_CONFIG['palmade']['gems'].each do |gem, branch|
       system("git clone #{GIT_REPO}:gems/#{gem} frameworks/#{gem}")
     end
   end
 
-  def self.plugins
+  def self.install_plugins
     POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
       system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"  
     end
   end
 
-  def self.apps
+  def self.install_apps
     POPO_CONFIG['caresharing']['apps'].each do |app|
       system "git clone #{GIT_REPO}:caresharing/#{app} apps/#{app}"
     end

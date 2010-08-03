@@ -11,12 +11,11 @@ POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
 POPO_CONFIG = { }
 COMMANDS = %w{ init wipe }
-VALID_TARGETS = [ 'staging', 'beta', 'development', 'production', 'test' ]
 GIT_CMD = `which git`.strip
 DEFAULT_TARGET = 'development'
 RVM_GIT_REPO = "git@git.caresharing.eu:popo/rvm"
 TOOLS_GIT_REPO = "git@git.caresharing.eu:popo/tools"
-SRC_TREE = [ 'apps', 'frameworks', 'plugins', 'helpers', 'external', 'configs', 'out/logs', 'out/pids', 'out/caches' ]
+SRC_TREE = [ 'apps', 'frameworks', 'plugins', 'helpers', 'external', 'configs', 'out/logs', 'out/tmp/pids', 'out/tmp/caches' ]
 
 l = LOGGER = Logger.new($stdout)
 l.level = Logger::INFO
@@ -61,9 +60,6 @@ module Popo
     end
 
     target = argv[1] || DEFAULT_TARGET
-    if not VALID_TARGETS.include? target
-      fail_exit "You might want to specify a valid target."
-    end
     
     l.debug { "Cloning popo from #{POPO_GIT_REPO} for #{target} target" }
 
