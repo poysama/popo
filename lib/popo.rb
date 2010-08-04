@@ -20,13 +20,13 @@ module Popo
     when 'rvm'
       Popo.rvm(root_path, argv)
     when 'install_gems'
-      Popo.gems
+      Popo.install_gems
     when 'install_frameworks'
-      Popo.frameworks
+      Popo.install_frameworks
     when 'install_plugins'
-      Popo.plugins
+      Popo.install_plugins
     when 'install_apps'
-      Popo.apps
+      Popo.install_apps
     when 'cable'
       Popo.cable
     when 'nuke'
@@ -114,7 +114,7 @@ module Popo
 
   def self.install_plugins
     POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
-      system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"  
+      system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"
     end
   end
 
