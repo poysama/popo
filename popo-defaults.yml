@@ -47,7 +47,7 @@ gems:
   - soap4r: 1.5.8
   - asset_packager: 0.5
   - eventmachine: 0.12.10
-  - analogger: 0.6.5
+  - analogger: 0.6.6
   - haml: [3.0.13, 2.0.9]
   - dev_util: 0.4
   - libxml-ruby: 1.1.3

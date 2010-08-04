@@ -12,6 +12,7 @@ globals:
     password: some_serious_password
     encoding: utf8
     pool: 5
+    db_prefix: %target%
 
   cactsing:
     redis_server: 127.0.0.1:6379
