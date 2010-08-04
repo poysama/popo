@@ -114,7 +114,7 @@ module Popo
 
   def self.install_plugins
     POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
-      system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"  
+      system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"
     end
   end
 
