@@ -15,7 +15,9 @@ fi
 unset rvm_loaded_flag
 rvm_loaded_flag=1
 
+GREEN="\[\033[0;32m\]"
 LIGHT_CYAN="\[\033[1;36m\]"
+WHITE="\[\033[1;37m\]"
 
 if [[ $PS1 != "" ]] ; then
     if [[ -f /etc/bash.bashrc ]] ; then
@@ -26,7 +28,7 @@ if [[ $PS1 != "" ]] ; then
         source $HOME/.bashrc
     fi
 
-    export PS1="$LIGHT_CYAN(popo $popo_target) $PS1"
+    export PS1="$GREEN(popo $popo_target)$WHITE $PS1"
 fi
 
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
