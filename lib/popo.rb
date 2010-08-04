@@ -31,10 +31,10 @@ module Popo
       Popo.cable
     when 'nuke'
       print "=== The Ultimate Combo! ==="
-      Popo.apps
-      Popo.frameworks
-      Popo.plugins
-      Popo.cable
+      Popo.install_apps
+      Popo.install_frameworks
+      Popo.install_plugins
+      Popo.install_cable
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
