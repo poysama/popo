@@ -30,7 +30,7 @@ module Popo
     when 'cable'
       Popo.cable
     when 'nuke'
-      print "=== The Ultimate Combo! ==="
+      print "=== The Ultimate Combo! ===\n\n"
       Popo.install_apps
       Popo.install_frameworks
       Popo.install_plugins
