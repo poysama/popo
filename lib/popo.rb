@@ -128,7 +128,6 @@ module Popo
     POPO_CONFIG['caresharing']['apps'].each do |app|
       Dir.chdir("apps/#{app}") { |p|
         puts "Cabling #{app}....."
-        sleep(1)
         system("cableguy")
       }
     end
