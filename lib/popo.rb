@@ -1,5 +1,5 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash rvm info status sync install_gems install_frameworks install_plugins install_apps cable nuke}
+COMMANDS.concat %w{ bash rvm info status sync install_gems install_frameworks install_plugins install_apps cable nuke pull}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -29,6 +29,8 @@ module Popo
       Popo.install_apps
     when 'cable'
       Popo.cable
+    when 'pull'
+      Popo.pull
     when 'nuke'
       print "=== The Ultimate Combo! ===\n\n"
       Popo.install_apps
@@ -130,6 +132,18 @@ module Popo
         system("cableguy")
       }
     end
+  end
+ 
+  def self.pull
+    Dir.chdir(".popo") { |p|
+      puts "== Updating Popo ==\n\n"
+      system("git pull")
+    }
+    Dir.chdir("tools") { |p|
+      puts "== Updating tools ==\n\n"
+      system("git pull")
+    }
+
   end
 end
 
