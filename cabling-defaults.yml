@@ -4,7 +4,7 @@
 # set ENV variable env CABLING_PATH=<some_path_to_cabling/cabling.yml
 
 globals:
-  environment: production
+  environment: development
   mysql: 
     host: 127.0.0.1
     port: 3306
@@ -184,7 +184,6 @@ applications:
       exception_notify: false
 
   patient:
-    environment: development
     appctl:
       listen:
         - 127.0.0.1:21201
@@ -195,6 +194,26 @@ applications:
       server: 127.0.0.1:1980
     host_config:
       exception_notify: false
+
+  logistics:
+    appctl:
+      listen:
+        - 127.0.0.1:21301
+      servers: 1
+      tail: false
+      tag: %target%
+    camp:
+      server: 127.0.0.1:1980
+    host_config:
+      exception_notify: false
+
+  bizsupport:
+    appctl:
+      listen:
+        - 127.0.0.1:20801
+      servers: 1
+      tail: false
+      tag: %target%
 
   files:
   

@@ -4,7 +4,7 @@ git: git@git.caresharing.eu
 
 caresharing:
   sites:
-  apps: [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist', 'console' ]
+  apps: [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist', 'console', 'bizsp' ]
 
 gems:
   - rake: 0.8.7
