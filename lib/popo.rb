@@ -92,6 +92,7 @@ module Popo
   end
 
   def self.install_gems
+    puts "== Installing system gems ==\n\n"
     POPO_CONFIG['gems'].each do |gem|
       gem.each do |gem_name, ver|
         tmp = []
@@ -106,21 +107,24 @@ module Popo
       end
     end
   end
-
+  
   def self.install_frameworks
+    puts "== Installing Frameworks ==\n\n"
     POPO_CONFIG['palmade']['gems'].each do |gem, branch|
       system("git clone #{GIT_REPO}:gems/#{gem} frameworks/#{gem}")
     end
   end
 
   def self.install_plugins
-    POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
+    puts "== Installing Plugins ==\n\n"
+    POPO_CONFIG['pxalmade']['plugins'].each do |plugin, branch|
       system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"
     end
   end
 
   def self.install_apps
     POPO_CONFIG['caresharing']['apps'].each do |app|
+      puts "== Installing Caresharing #{app} ==\n\n"
       system "git clone #{GIT_REPO}:caresharing/#{app} apps/#{app}"
     end
   end
@@ -146,4 +150,3 @@ module Popo
 
   end
 end
-
