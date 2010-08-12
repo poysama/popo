@@ -6,11 +6,12 @@ require 'logger'
 require 'yaml'
 require 'fileutils'
 
+POPO_VERSION = "0.4"
 POPO_GIT_REPO = "git@git.caresharing.eu:popo/popo"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
 POPO_CONFIG = { }
-COMMANDS = %w{ init wipe reset}
+COMMANDS = %w{ init wipe version}
 GIT_CMD = `which git`.strip
 DEFAULT_TARGET = 'development'
 RVM_GIT_REPO = "git@git.caresharing.eu:popo/rvm"
@@ -181,6 +182,8 @@ when nil, ''
   puts opts_parse.help
 when 'init'
   Popo.init(root_path, argv)
+when 'version'
+  Popo.fail_exit 'popo ' + POPO_VERSION
 else
   if Popo.in_popo?(root_path)
     l.debug "Working path: #{root_path}"
