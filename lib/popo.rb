@@ -29,6 +29,8 @@ module Popo
       Popo.install_apps
     when 'cable'
       Popo.cable
+    when 'reset'
+      Popo.reset
     when 'nuke'
       print "=== The Ultimate Combo! ===\n\n"
       Popo.install_gems
