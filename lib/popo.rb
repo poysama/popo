@@ -29,10 +29,9 @@ module Popo
       Popo.install_apps
     when 'cable'
       Popo.cable
-    when 'pull'
-      Popo.pull
     when 'nuke'
       print "=== The Ultimate Combo! ===\n\n"
+      Popo.install_gems
       Popo.install_apps
       Popo.install_frameworks
       Popo.install_plugins
@@ -117,7 +116,7 @@ module Popo
 
   def self.install_plugins
     puts "== Installing Plugins ==\n\n"
-    POPO_CONFIG['pxalmade']['plugins'].each do |plugin, branch|
+    POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
       system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"
     end
   end
@@ -136,17 +135,5 @@ module Popo
         system("cableguy")
       }
     end
-  end
- 
-  def self.pull
-    Dir.chdir(".popo") { |p|
-      puts "== Updating Popo ==\n\n"
-      system("git pull")
-    }
-    Dir.chdir("tools") { |p|
-      puts "== Updating tools ==\n\n"
-      system("git pull")
-    }
-
   end
 end
