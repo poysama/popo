@@ -181,8 +181,6 @@ when nil, ''
   puts opts_parse.help
 when 'init'
   Popo.init(root_path, argv)
-when 'reset'
-  Popo.reset
 else
   if Popo.in_popo?(root_path)
     l.debug "Working path: #{root_path}"
