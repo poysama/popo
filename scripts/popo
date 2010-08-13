@@ -6,7 +6,7 @@ require 'logger'
 require 'yaml'
 require 'fileutils'
 
-POPO_VERSION = "0.4"
+POPO_VERSION = "0.5"
 POPO_GIT_REPO = "git@git.caresharing.eu:popo/popo"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
