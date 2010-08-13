@@ -158,42 +158,44 @@ module Popo
   end
 end
 
-root_path = Dir.pwd
-Popo.check_requirements!
-begin
-  Popo.require_relative_work_popo(root_path) if Popo.in_popo?(root_path)
-rescue LoadError
-end
+if __FILE__ == $0
+  root_path = Dir.pwd
+  Popo.check_requirements!
+  begin
+    Popo.require_relative_work_popo(root_path) if Popo.in_popo?(root_path)
+  rescue LoadError
+  end
 
-opts = OpenStruct.new
-opts_parse = OptionParser.new do |o|
-  o.banner = "Popo command utility\n" +
-    "  Usage: popo command\n" +
-    "  Commands: #{COMMANDS.join(' ')}"
+  opts = OpenStruct.new
+  opts_parse = OptionParser.new do |o|
+    o.banner = "Popo command utility\n" +
+      "  Usage: popo command\n" +
+      "  Commands: #{COMMANDS.join(' ')}"
 
-  o.separator ""
-end
+    o.separator ""
+  end
 
-argv = ARGV.dup
+  argv = ARGV.dup
 
-command = argv[0]
-case command
-when nil, ''
-  puts opts_parse.help
-when 'init'
-  Popo.init(root_path, argv)
-when 'version'
-  Popo.fail_exit 'popo ' + POPO_VERSION
-else
-  if Popo.in_popo?(root_path)
-    l.debug "Working path: #{root_path}"
-    case command
-    when 'wipe'
-      Popo.wipe(root_path, argv)
-    else
-      Popo.commands(root_path, opts, opts_parse, argv)
-    end
+  command = argv[0]
+  case command
+  when nil, ''
+    puts opts_parse.help
+  when 'init'
+    Popo.init(root_path, argv)
+  when 'version'
+    Popo.fail_exit 'popo ' + POPO_VERSION
   else
-    $stderr.puts "You don't seem to be in a popoized directory. Perhaps popo init first? Aborting."
+    if Popo.in_popo?(root_path)
+      l.debug "Working path: #{root_path}"
+      case command
+      when 'wipe'
+        Popo.wipe(root_path, argv)
+      else
+        Popo.commands(root_path, opts, opts_parse, argv)
+      end
+    else
+      $stderr.puts "You don't seem to be in a popoized directory. Perhaps popo init first? Aborting."
+    end
   end
 end
