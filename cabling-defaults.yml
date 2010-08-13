@@ -71,6 +71,7 @@ globals:
       fundus: fundus
       ptlist: chronische-zorg-lite
       patient: patient
+      #bizsupport: bizsupport
 
 applications:
   # app name

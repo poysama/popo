@@ -4,7 +4,29 @@ git: git@git.caresharing.eu
 
 caresharing:
   sites:
-  apps: [ 'account', 'base', 'base2', 'chronic', 'clinic', 'fundus', 'group', 'group2', 'ptlist', 'console', 'bizsp' ]
+  apps: 
+    account:
+      branch: master
+    base:
+      branch: master
+    base2:
+      branch: master
+    chronic:
+      branch: master 
+    clinic:
+      branch: master
+    fundus:
+      branch: master
+    group:
+      branch: master
+    group2:
+      branch: master
+    ptlist:
+      branch: master
+    console:
+      branch: rel-2010-06-24-fixes
+    bizsp:
+      branch: master
 
 gems:
   - rake: 0.8.7
@@ -43,7 +65,7 @@ gems:
   - highline: 1.4.0
   - echoe: 3.1.1
   - ar-extensions: 0.6.0
-  - httpclient: 2.1.2
+  - httpclient: [2.1.2, 2.1.5.2]
   - soap4r: 1.5.8
   - asset_packager: 0.5
   - eventmachine: 0.12.10
@@ -58,7 +80,7 @@ gems:
   - camping: 1.9.335
   - validatable: 1.6.7
   - spreadsheet-excel: 0.3.5.1
-  - thin: 1.2.5
+  - thin: 1.2.7
   - redis: 0.1
   - builder: 2.1.2
   - yajl-ruby: 0.7.0
@@ -74,43 +96,49 @@ gems:
   - rails: 2.3.8
   - net-sftp: 2.0.4
   - net-ssh: 2.0.23
+  - edi4r: 0.9.4.1
+  - edi4r-tdid: 0.6.5
 
 palmade:
   gems:
-    analogger_client: master
-    asset_packager: master
-    cactsing: master
-    control_access: master
-    db_essentials: master
-    palmade_extensions: master
-    rails_extensions: master
-    stack: master
-    caresharing: master
-    cells: master
-    merb_extensions: master
-    openid_arstore: master
-    openid_dmstore: master
-    openid_helper: master
-    mogilicious: master
-    mogilicious_server: master
-    rack_dav: master
-    mogilefs-client: master
-    rails2_ext: master
-    dev_util: master
-    puppet_master: master
-    analogger: master
-    caresharing_base: master
-    caresharing_builtin_data: master
-    caresharing_alerts: master
-    couch_potato: master
-    builtin_data_loader: master
-    caresharing_app: master
-    caresharing_core: master
-    caresharing_campout: master
-    caresharing_api: master
-    caresharing_api_core: master
-    camping_ext: master
-    reporting: master
+    analogger_client:
+    asset_packager:
+    cactsing:
+    control_access:
+    db_essentials:
+    palmade_extensions:
+    rails_extensions:
+    stack:
+    caresharing:
+    cells:
+    merb_extensions:
+    openid_arstore:
+    openid_dmstore:
+    openid_helper:
+    mogilicious:
+    mogilicious_server:
+    rack_dav:
+    mogilefs-client:
+    rails2_ext:
+    dev_util:
+    puppet_master:
+      repo: http://github.com/markjeee/puppet_master.git
+    analogger:
+    caresharing_base:
+    caresharing_builtin_data:
+    caresharing_alerts:
+    couch_potato:
+    builtin_data_loader:
+    caresharing_app:
+    caresharing_core:
+    caresharing_campout:
+    caresharing_api:
+    caresharing_api_core:
+    camping_ext:
+      repo: http://github.com/markjeee/camping_ext.git
+    reporting:
+    http_service:
+      repo: http://github.com/markjeee/http_service.git
   plugins:
     asset_handler: master
     host_config_handler: master

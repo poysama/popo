@@ -1,5 +1,5 @@
 # add additional commands for the originally loaded popo
-COMMANDS.concat %w{ bash rvm info status sync install_gems install_frameworks install_plugins install_apps cable nuke pull}
+COMMANDS.concat %w{ bash rvm info status cable reset}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -19,24 +19,10 @@ module Popo
       Popo.bash(root_path)
     when 'rvm'
       Popo.rvm(root_path, argv)
-    when 'install_gems'
-      Popo.install_gems
-    when 'install_frameworks'
-      Popo.install_frameworks
-    when 'install_plugins'
-      Popo.install_plugins
-    when 'install_apps'
-      Popo.install_apps
     when 'cable'
       Popo.cable
     when 'reset'
       Popo.reset
-    when 'nuke'
-      print "=== The Ultimate Combo! ===\n\n"
-      Popo.install_gems
-      Popo.install_apps
-      Popo.install_frameworks
-      Popo.install_plugins
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
@@ -92,43 +78,6 @@ module Popo
     exec(bashcmd)
   end
 
-  def self.install_gems
-    puts "== Installing system gems ==\n\n"
-    POPO_CONFIG['gems'].each do |gem|
-      gem.each do |gem_name, ver|
-        tmp = []
-        if ver.is_a? Array
-          tmp = ver
-        else
-          tmp << ver
-        end
-        tmp.each do |ver2|
-          system "gem install #{gem_name} -v #{ver2} --source http://gems.caresharing.eu --no-ri --no-rdoc"
-        end
-      end
-    end
-  end
-  
-  def self.install_frameworks
-    puts "== Installing Frameworks ==\n\n"
-    POPO_CONFIG['palmade']['gems'].each do |gem, branch|
-      system("git clone #{GIT_REPO}:gems/#{gem} frameworks/#{gem}")
-    end
-  end
-
-  def self.install_plugins
-    puts "== Installing Plugins ==\n\n"
-    POPO_CONFIG['palmade']['plugins'].each do |plugin, branch|
-      system "git clone #{GIT_REPO}:plugins/#{plugin} plugins/#{plugin}"
-    end
-  end
-
-  def self.install_apps
-    POPO_CONFIG['caresharing']['apps'].each do |app|
-      puts "== Installing Caresharing #{app} ==\n\n"
-      system "git clone #{GIT_REPO}:caresharing/#{app} apps/#{app}"
-    end
-  end
 
   def self.cable
     POPO_CONFIG['caresharing']['apps'].each do |app|
@@ -138,4 +87,5 @@ module Popo
       }
     end
   end
+  
 end
