@@ -80,11 +80,13 @@ module Popo
 
 
   def self.cable
-    POPO_CONFIG['caresharing']['apps'].each do |app|
-      Dir.chdir("apps/#{app}") { |p|
-        puts "Cabling #{app}....."
-        system("cableguy")
-      }
+    POPO_CONFIG['caresharing']['apps'].each do |app, v|
+      if File.directory? "apps/#{app}"  
+        Dir.chdir("apps/#{app}") { |p|
+          puts "Cabling #{app}....."
+          system("cable")
+        }
+      end
     end
   end
   
