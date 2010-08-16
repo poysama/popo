@@ -24,7 +24,8 @@ caresharing:
     ptlist:
       branch: master
     console:
-      branch: rel-2010-06-24-fixes
+      branch: master
+      #branch: rel-2010-06-24-fixes
     bizsp:
       branch: master
 
@@ -122,7 +123,7 @@ palmade:
     rails2_ext:
     dev_util:
     puppet_master:
-      repo: http://github.com/markjeee/puppet_master.git
+      repo: git://github.com/markjeee/puppet_master.git
     analogger:
     caresharing_base:
     caresharing_builtin_data:
@@ -135,10 +136,10 @@ palmade:
     caresharing_api:
     caresharing_api_core:
     camping_ext:
-      repo: http://github.com/markjeee/camping_ext.git
+      repo: git://github.com/markjeee/camping_ext.git
     reporting:
     http_service:
-      repo: http://github.com/markjeee/http_service.git
+      repo: git://github.com/markjeee/http_service.git
   plugins:
     asset_handler: master
     host_config_handler: master
