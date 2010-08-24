@@ -6,7 +6,7 @@ require 'logger'
 require 'yaml'
 require 'fileutils'
 
-POPO_VERSION = "0.6"
+POPO_VERSION = "0.7"
 POPO_GIT_REPO = "git@git.caresharing.eu:popo/popo"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
@@ -53,25 +53,6 @@ module Popo
   def self.popo_puts(m)
     puts "\e[33m#{m}\e[0;0m"  
   end
-  
-  def self.reset
-    if ENV['popo_target'].nil? || ENV['popo_path'].nil?
-      fail_exit "Popo is not loaded. popo bash perhaps?"
-    end
-
-    target = ENV['popo_target']    
-    root_path = ENV['popo_path'].split('/')
-    parsed_dir = root_path.pop
-    parsed_root_path = root_path.join('/')
-
-    # write default configuration files
-    yml_write(parsed_root_path, parsed_dir, target, 'cabling')
-    yml_write(parsed_root_path, parsed_dir, target, 'popo')
-    yml_write(parsed_root_path, parsed_dir, target, 'dbget')
-
-    popo_puts "\nYAML files under .popo have been reset to UPDATED defaults\n" +
-         "Please change the values according to your setup, AGAIN\n"  
-  end
 
   def self.wipe(root_path, argv = [ ])
     cmd = "rm -Rf * #{POPO_WORK_PATH}"
@@ -108,7 +89,7 @@ module Popo
     yml_write(root_path, dir, target, 'cabling')
     yml_write(root_path, dir, target, 'popo')
     yml_write(root_path, dir, target, 'dbget')
-    
+    yml_write(root_path, dir, target, 'poop')
     # clone tools
     popo_puts "Deploying handy tools..."
     cmd = "#{GIT_CMD} clone #{TOOLS_GIT_REPO} #{dir}/tools"

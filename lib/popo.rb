@@ -1,4 +1,5 @@
 # add additional commands for the originally loaded popo
+
 COMMANDS.concat %w{ bash rvm info status cable reset}
 
 BASH_BIN = `which bash`.strip
@@ -78,9 +79,13 @@ module Popo
     exec(bashcmd)
   end
 
-
   def self.cable
-    POPO_CONFIG['caresharing']['apps'].each do |app, v|
+    begin
+      poop_yml = YAML::load_file(ENV['popo_path'] + '/.popo/poop.yml')
+    rescue
+    end
+    apps_list = poop_yml['apps'] || POPO_CONFIG['apps']
+    apps_list.each do |app, v|
       if File.directory? "apps/#{app}"  
         Dir.chdir("apps/#{app}") { |p|
           puts "Cabling #{app}....."
@@ -89,5 +94,40 @@ module Popo
       end
     end
   end
-  
+
+  def self.reset
+    if ENV['popo_target'].nil? || ENV['popo_path'].nil?
+      fail_exit "Popo is not loaded. popo bash perhaps?"
+    else
+      require File.join(ENV['popo_path'], '.popo/lib/hash.rb')
+    end
+
+    target = ENV['popo_target']    
+    root_path = ENV['popo_path']
+    
+    combine(root_path, 'cabling')
+    combine(root_path, 'dbget')
+    combine(root_path, 'popo')
+    combine(root_path, 'poop')
+    
+    popo_puts "\nThe new default files and your current ones are now merged.\n" +
+              "Your new config files are UGLY and ready.\n"
+  end
+
+  def self.combine(root_path, file)
+    full_root_path = "#{root_path}/.popo/#{file}"
+    defaults_file = YAML::load_file("#{full_root_path}-defaults.yml")
+    current_file = YAML::load_file("#{full_root_path}.yml")
+    
+    defaults_file.deep_merge! current_file
+    
+    # patch fix for new yml
+    defaults_file.delete('caresharing')
+    defaults_file.delete('palmade')
+    defaults_file.delete('git')
+
+    final_file = YAML::dump(defaults_file)
+    final_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}")
+    File.open(full_root_path + '.yml' , 'w') { |f| f.write(final_file) }
+  end
 end
