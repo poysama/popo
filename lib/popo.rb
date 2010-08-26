@@ -116,18 +116,21 @@ module Popo
 
   def self.combine(root_path, file)
     full_root_path = "#{root_path}/.popo/#{file}"
-    defaults_file = YAML::load_file("#{full_root_path}-defaults.yml")
-    current_file = YAML::load_file("#{full_root_path}.yml")
+    begin
+      defaults_file = YAML::load_file("#{full_root_path}-defaults.yml")
+      current_file = YAML::load_file("#{full_root_path}.yml")
     
-    defaults_file.deep_merge! current_file
+      defaults_file.deep_merge! current_file
     
-    # patch fix for new yml
-    defaults_file.delete('caresharing')
-    defaults_file.delete('palmade')
-    defaults_file.delete('git')
+      # patch fix for new yml
+      defaults_file.delete('caresharing')
+      defaults_file.delete('palmade')
+      defaults_file.delete('git')
 
-    final_file = YAML::dump(defaults_file)
-    final_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}")
-    File.open(full_root_path + '.yml' , 'w') { |f| f.write(final_file) }
+      final_file = YAML::dump(defaults_file)
+      final_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}")
+      File.open(full_root_path + '.yml' , 'w') { |f| f.write(final_file) }
+    rescue
+    end
   end
 end
