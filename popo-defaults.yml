@@ -76,7 +76,6 @@ gems:
 - redis: 0.1
 - builder: 2.1.2
 - yajl-ruby: 0.7.0
-- mysql: 2.7
 - rmagick: 1.15.13
 - curb: 0.6.6.0
 - activesupport: 2.3.8

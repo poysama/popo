@@ -82,9 +82,11 @@ module Popo
   def self.cable
     begin
       poop_yml = YAML::load_file(ENV['popo_path'] + '/.popo/poop.yml')
+      apps_list = poop_yml['apps']
     rescue
+      apps_list = POPO_CONFIG['apps']
     end
-    apps_list = poop_yml['apps'] || POPO_CONFIG['apps']
+
     apps_list.each do |app, v|
       if File.directory? "apps/#{app}"  
         Dir.chdir("apps/#{app}") { |p|
