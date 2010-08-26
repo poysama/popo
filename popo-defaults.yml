@@ -136,7 +136,6 @@ plugins:
   host_config_handler:
   base_extensions:
   caresharing_base: 
-    branch: rel-2010-06-24-fixes
   acts_as_commentable:
   file_column:
   openid_authentication:
