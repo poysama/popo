@@ -229,3 +229,7 @@ applications:
   firestarter:
     camp:
       server: 127.0.0.1:1980
+
+  datum:
+    camp:
+      server: 127.0.0.1:1980
