@@ -45,7 +45,11 @@ globals:
         pid_file: tmp/mogilicious_stored.pid
         log_file: log/mogilicious_stored.log
         servers: 2
-
+  nginx:
+    cert_path: /opt/palmade/development/tools/etc/caresharing.eu.pem
+    cert_key_path: /opt/palmade/development/tools/etc/server.key
+    log_path: /usr/local/nginx/logs
+    
   # information here will be used for caresharing_site.yml in base and base2 apps and database.yml
   caresharing:
     sites: [diabetescirkel, gho, ghogo, hagroweert, hznk, meditta, omnihis, roha, rohwn, test, whc]
