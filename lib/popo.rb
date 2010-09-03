@@ -82,7 +82,11 @@ module Popo
   def self.cable
     begin
       poop_yml = YAML::load_file(ENV['popo_path'] + '/.popo/poop.yml')
-      apps_list = poop_yml['apps']
+      if poop_yml['apps'].nil?
+        apps_list = POPO_CONFIG['apps']
+      else
+        apps_list = poop_yml['apps']
+      end
     rescue
       apps_list = POPO_CONFIG['apps']
     end
@@ -107,30 +111,32 @@ module Popo
     target = ENV['popo_target']    
     root_path = ENV['popo_path']
     
-    combine(root_path, 'cabling')
-    combine(root_path, 'dbget')
-    combine(root_path, 'popo')
-    combine(root_path, 'poop')
+    combine(root_path, target, 'cabling')
+    combine(root_path, target, 'dbget')
+    combine(root_path, target, 'popo')
+    combine(root_path, target, 'poop')
     
     popo_puts "\nThe new default files and your current ones are now merged.\n" +
               "Your new config files are UGLY and ready.\n"
   end
 
-  def self.combine(root_path, file)
+  def self.combine(root_path, target, file)
     full_root_path = "#{root_path}/.popo/#{file}"
     begin
       defaults_file = YAML::load_file("#{full_root_path}-defaults.yml")
       current_file = YAML::load_file("#{full_root_path}.yml")
     
-      defaults_file.deep_merge! current_file
-    
+      #defaults_file.deep_merge! current_file
+      current_file.deep_merge! defaults_file
       # patch fix for new yml
       defaults_file.delete('caresharing')
       defaults_file.delete('palmade')
       defaults_file.delete('git')
 
-      final_file = YAML::dump(defaults_file)
+      final_file = YAML::dump(current_file)
       final_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}")
+      
+      final_file.gsub!(/\%target\%/, target)
       File.open(full_root_path + '.yml' , 'w') { |f| f.write(final_file) }
     rescue
     end

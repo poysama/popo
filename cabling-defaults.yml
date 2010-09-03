@@ -52,7 +52,18 @@ globals:
     
   # information here will be used for caresharing_site.yml in base and base2 apps and database.yml
   caresharing:
-    sites: [diabetescirkel, gho, ghogo, hagroweert, hznk, meditta, omnihis, roha, rohwn, test, whc]
+    sites: 
+    - diabetescirkel
+    - gho
+    - ghogo
+    - hagroweert
+    - hznk
+    - meditta
+    - omnihis
+    - roha
+    - rohwn
+    - test
+    - whc
   # protocol - available options http for port 80 and https for 443
     protocol: http
   # domain
@@ -237,3 +248,4 @@ applications:
   datum:
     camp:
       server: 127.0.0.1:1980
+      
