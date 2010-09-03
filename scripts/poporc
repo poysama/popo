@@ -27,7 +27,7 @@ if [[ $PS1 != "" ]] ; then
         source $HOME/.bashrc
     fi
 
-    export PS1="$SHIT(popo $popo_target)$NORMAL$PS1"
+    export PS1="$SHIT(popo $popo_target) $NORMAL$PS1"
 fi
 
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
