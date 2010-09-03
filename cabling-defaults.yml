@@ -12,7 +12,7 @@ globals:
     password: 
     encoding: utf8
     pool: 5
-    db_prefix: %target%
+    db_prefix: caresharing
 
   cactsing:
     redis_server: 127.0.0.1:6379
