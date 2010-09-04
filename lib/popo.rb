@@ -2,6 +2,7 @@
 
 COMMANDS.concat %w{ bash rvm info status cable reset}
 
+
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
