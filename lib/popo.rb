@@ -7,7 +7,6 @@ ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
 GIT_REPO = 'git@git.caresharing.eu'
 
-
 module Popo
   def self.commands(root_path, opts, opts_parse, argv = [ ])
     case argv[0]
