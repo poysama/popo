@@ -130,9 +130,9 @@ module Popo
       #defaults_file.deep_merge! current_file
       current_file.deep_merge! defaults_file
       # patch fix for new yml
-      defaults_file.delete('caresharing')
-      defaults_file.delete('palmade')
-      defaults_file.delete('git')
+      current_file.delete('caresharing')
+      current_file.delete('palmade')
+      current_file.delete('git')
 
       final_file = YAML::dump(current_file)
       final_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}")
