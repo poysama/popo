@@ -129,7 +129,11 @@ frameworks:
   reporting:
   http_service:
     repo: git://github.com/markjeee/http_service.git
-    
+  caresharing_clinics:
+  caresharing_patients:
+  caresharing_users:
+  caresharing_datum:
+
 plugins:
   asset_handler:
   host_config_handler:

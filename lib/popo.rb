@@ -120,7 +120,7 @@ module Popo
     popo_puts "\nThe new default files and your current ones are now merged.\n" +
               "Your new config files are UGLY and ready.\n"
   end
-
+  
   def self.combine(root_path, target, file)
     full_root_path = "#{root_path}/.popo/#{file}"
     begin
@@ -128,6 +128,10 @@ module Popo
       current_file = YAML::load_file("#{full_root_path}.yml")
     
       #defaults_file.deep_merge! current_file
+      if file.eql? 'cabling'
+        defaults_file['globals']['mysql']['password'] = current_file['globals']['mysql']['password']
+        defaults_file['globals']['analogger']['key'] = current_file['globals']['analogger']['key'] 
+      end
       current_file.deep_merge! defaults_file
       # patch fix for new yml
       current_file.delete('caresharing')
