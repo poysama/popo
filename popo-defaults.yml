@@ -8,11 +8,13 @@ apps:
   account:
   base:
   base2:
+    branch: development
   chronic:
   clinic:
   fundus:
   group:
   group2:
+    branch: development
   ptlist:
   console:
   bizsp:
