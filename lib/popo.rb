@@ -24,7 +24,8 @@ module Popo
     when 'cable'
       Popo.cable
     when 'reset'
-      Popo.reset
+      #Popo.reset
+     fail_exit "Reset is disabled." 
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
