@@ -35,7 +35,7 @@ source $rvm_prefix/rvm/scripts/rvm
 
 # Load default rvm
 rvm default 1>/dev/null 2>&1
-
+unset PALMADE_GEMS_DIR
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
 
 if [[ -z "$PS1" ]] ; then

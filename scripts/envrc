@@ -1,3 +1,4 @@
+unset PALMADE_GEMS_DIR
 unset rvm_loaded_flag
 rvm_loaded_flag=1
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
