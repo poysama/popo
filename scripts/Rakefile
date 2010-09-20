@@ -1,0 +1,56 @@
+load 'popo'
+
+POPO_PACKAGE_VERSION = 1
+POPO_PACKAGE_NAME = "popo-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
+
+def control_file
+  "Package: popo\n" +
+  "Version: #{POPO_VERSION}-#{POPO_PACKAGE_VERSION}\n" +
+  "Section: Caresharing Tools\n" +
+  "Priority: optional\n" +
+  "Architecture: all\n" +
+  "Depends: ruby, git-core, libcurl4-dev, libmysqlclient-dev, libreadline-dev, curl, libssl-dev, g++, libmagickcore-dev\n" +
+  "Maintainer: Caresharing Framework Team <framework@caresharing.eu>\n" +
+  "Description: Popo utilities\n" +
+  " Popo allows you to easily deploy and configure Caresharing applications"
+end
+
+def popo_puts(message)
+  puts "\e[33m#{message}\e[0;0m"  
+end
+
+desc "Creates a debian package of popo"
+task :deb do
+  popo_puts "Packaging popo version #{POPO_VERSION} as deb..."
+
+  system "mkdir -p #{POPO_PACKAGE_NAME}/usr/bin"
+  system "cp popo #{POPO_PACKAGE_NAME}/usr/bin"
+
+  system "mkdir -p #{POPO_PACKAGE_NAME}/DEBIAN"
+  system "echo \"#{control_file}\" > #{POPO_PACKAGE_NAME}/DEBIAN/control"
+
+  system "dpkg-deb -b #{POPO_PACKAGE_NAME}"
+  system "rm -rf #{POPO_PACKAGE_NAME}"
+
+  popo_puts "Done!"
+end
+
+desc "Deploys debian package to remote deb repository"
+task :deploy do
+  popo_puts "Copying deb package to remote server..."
+  system "scp #{POPO_PACKAGE_NAME}.deb root@styx.caresharing:/var/www/caresharing/" 
+  popo_puts "Done!"
+
+  popo_puts "Generating index on deb repo..."
+  system "ssh root@styx.caresharing /var/www/caresharing/generate_index" 
+  popo_puts "Done!"
+end
+
+desc "Cleans up the working directory"
+task :clean do
+  popo_puts "Cleaning up... "
+  system "rm #{POPO_PACKAGE_NAME}.deb"
+  popo_puts "Done!"
+end
+
+task :default => "deb"

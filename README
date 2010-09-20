@@ -1,0 +1,43 @@
+POPO
+- Popo repo tool used to maintain your local caresharing build environment.
+
+CHANGELOG
+-------------------------------------------------------------------------
+
+0.7
+
+New
+- Popo reset now takes the last value of all information from last known config file (dbget, cabling, popo)
+- Popo reset deletes the keys listed in popo.yml (caresharing, git and palmade) and are replaced with shorter/clean ones.
+- Popo reset is now transferred from popo scripts to lib/popo.rb
+- Gather all now includes system gems(gather gems)
+- poop-defaults.yml added
+- poop.yml is now generated in popo init
+- Reworked gather.
+  - Gather now accepts an optional file called poop.yml
+  - poop.yml is like popo.yml but much smaller
+  - poop.yml is a list of your I-ONLY-WANT-TO-PULL-THESE apps, frameworks, plugins and gems.
+  - Tool Gather now gets mad when you pull something non-popo.
+- popo-defaults.yml changes
+  - Trimmed down keys.
+  - new source; handles git and gem sources
+- cabling-defaults.yml changes
+  - Added commented bizsupport to apps to includ in nginx spawn
+  - removed mysql default password
+  - added firestarter and console2 to apps
+- Cableguy is now known as cable
+- Frameworks
+  - The frameworks listed below by default and fresh popo init now uses markjeee's github repo
+    - puppet_master
+    - camping_ext
+    - http_service
+- Gems
+  - added edi4r-tdid and edi4r on popo-defaults.yml gem list for console
+    
+
+Fixes
+- Fixed spawn nginx template logistics and group2 values correctly.
+
+
+
+
