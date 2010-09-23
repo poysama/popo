@@ -7,8 +7,10 @@ ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
 GIT_REPO = 'git@git.caresharing.eu'
 POPO_ROOT = ENV['popo_path']
+VALID_MODS = { 'frameworks' => 'f', 'plugins' => 'p', 'apps' => 'a' }
+
 module Popo
-  def self.commands(root_path, opts, opts_parse, argv = [ ])
+  def self.commands(root_path, options, optparse, argv = [ ])
     case argv[0]
     when 'sync'
       Popo.sync(root_path)
@@ -26,11 +28,19 @@ module Popo
       Popo.cable
     when 'reset'
       if ENV['popo_target'].eql? 'production'
-        popo_puts "[Popo]: Resetting config files...Of course you can't."
+        popo_puts "[Popo]: You cannot reset in production mode"
       else
         Popo.reset
       end
-      #fail_exit "Reset is disabled." 
+      #fail_exit "Reset is disabled."
+    when 'clone'
+      Popo.clone(argv)
+    when 'configure'
+      root_path = root_path.split('/')
+      options[:dir] = root_path.pop
+      root_path = root_path.join('/')
+      puts root_path.inspect
+      Popo.configure(root_path, POPO_CONFIG['target'], options)
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
@@ -38,6 +48,7 @@ module Popo
   end
 
   def self.check_extended_requirements!
+    
   end
 
   def self.info(root_path)
@@ -156,5 +167,8 @@ module Popo
     rescue
 
     end
+  end
+
+  def self.clone(argv)
   end
 end
