@@ -6,17 +6,16 @@ require 'logger'
 require 'yaml'
 require 'fileutils'
 
-POPO_VERSION = "0.7"
-POPO_GIT_REPO = "git@git.caresharing.eu:popo/popo"
+POPO_VERSION = "2.0"
+CONFIG_FILE_PATH = "/etc/popo.yml"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
 POPO_CONFIG = { }
 COMMANDS = %w{ init wipe version}
 GIT_CMD = `which git`.strip
+ENV_CMD = `which env`.strip
+BASH_CMD = `which bash`.strip
 DEFAULT_TARGET = 'development'
-RVM_GIT_REPO = "git@git.caresharing.eu:popo/rvm"
-TOOLS_GIT_REPO = "git@git.caresharing.eu:popo/tools"
-SRC_TREE = [ 'apps', 'assets', 'frameworks', 'plugins', 'helpers', 'external', 'configs', 'out/logs', 'out/tmp/pids', 'out/tmp/caches' ]
 
 l = LOGGER = Logger.new($stdout)
 l.level = Logger::INFO
@@ -28,6 +27,22 @@ module Popo
     end
   end
 
+  def self.load_config
+    if File.exist? CONFIG_FILE_PATH
+      c = YAML.load_file("/etc/popo.yml")
+      cfg = c['popo']
+      @popo_git = cfg['git_repo']
+      @rvm_repo = cfg['rvm_repo']
+      @tools_repo = cfg['tools_repo']
+      @src_conf = cfg['src_conf']
+      @dir_list = cfg['dir_list']
+      @rvm_stable = cfg['rvm_stable']
+      @gem_repo = cfg['gem_repo']
+    else
+      fail_exit "Config file not found in #{CONFIG_FILE_PATH}"
+    end
+  end
+  
   def self.l; LOGGER; end
   def self.fail_exit(m); $stderr.puts(m); exit(-1); end
 
@@ -44,89 +59,116 @@ module Popo
         fail_exit "#{POPO_WORK_PATH}/#{POPO_YML_FILE} seems to be wrong"
       end
     else
-      fail_exit "Found a popo working path, but no valid #{POPO_YML_FILE} config file"
+      popo_puts "#{POPO_YML_FILE} not found."
     end
 
     Popo.check_extended_requirements!
   end
 
   def self.popo_puts(m)
-    puts "\e[33m#{m}\e[0;0m"  
+    puts "\e[33m#{m}\e[0;0m"
   end
 
-  def self.wipe(root_path, argv = [ ])
+  def self.popo_print(m)
+    print "\e[33m#{m}\e[0;0m"
+  end
+
+  def self.wipe(root_path, argv = [])
     cmd = "rm -Rf * #{POPO_WORK_PATH}"
     docmd(cmd)
   end
 
-  def self.init(root_path, argv = [ ])
+  def self.init(root_path, options)
     if in_popo?(root_path)
       fail_exit "Already initialized popo directory. Perhaps a different task bozo."
     end
 
-    if argv[1].nil?
-      fail_exit "Specify directory name."
+    if options[:dir].nil?
+      fail_exit "Must specify target."
+    end
+
+    if options[:user].nil?
+      fail_exit "Specify a user with the -u option."
     end
     
-    dir = argv[1]
-    target = argv[2] || DEFAULT_TARGET
-    if argv[2].nil?
-      popo_puts "You have not specfied a target. Using #{DEFAULT_TARGET} as target"
+    dir = options[:dir]
+    target = options[:target] || DEFAULT_TARGET
+    
+    if target.nil?
+      popo_puts "No target specfied. Using #{DEFAULT_TARGET} as target"
     else
-      popo_puts "Using target #{target}"
+      popo_puts "Using target [#{target}]."
     end
 
     if File.directory? dir
-      fail_exit "Directory #{dir} exists. ZzZ"
+      fail_exit "Directory [#{dir}] exists."
     end
     
-    l.debug { "Cloning popo from #{POPO_GIT_REPO} for #{target} target" }
-
-    cmd = "#{GIT_CMD} clone #{POPO_GIT_REPO} #{dir}/#{POPO_WORK_PATH}"
+    l.debug { "Cloning popo from #{@popo_git} for #{target} target" }
+    # clone popo
+    popo_puts '[Dumping .popo]'
+    cmd = "#{GIT_CMD} clone #{@popo_git} #{dir}/#{POPO_WORK_PATH}"
     docmd(cmd)
 
-    # write default configuration files
-    yml_write(root_path, dir, target, 'cabling')
-    yml_write(root_path, dir, target, 'popo')
-    yml_write(root_path, dir, target, 'dbget')
-    yml_write(root_path, dir, target, 'poop')
     # clone tools
-    popo_puts "Deploying handy tools..."
-    cmd = "#{GIT_CMD} clone #{TOOLS_GIT_REPO} #{dir}/tools"
+    popo_puts '[Gathering tools]'
+    cmd = "#{GIT_CMD} clone #{@tools_repo} #{dir}/tools"
     docmd(cmd)
+
+    # configure
+    configure(root_path, target, options)
     
     # clone rvm
-    popo_puts "RVM, making your ruby life easier...."
-    cmd = "#{GIT_CMD} clone #{RVM_GIT_REPO} #{dir}/rvm"
+    popo_puts '[Loading Ruby Version Manager]'
+    cmd = "#{GIT_CMD} clone #{@rvm_repo} #{dir}/rvm"
     docmd(cmd)
-
-    popo_puts "Building additional branches for your tree..."
-    SRC_TREE.each do |t|
-      popo_puts FileUtils::mkdir_p("#{dir}/#{t}")
+    
+    @dir_list.each do |t|
+      popo_puts "[Creating directory]: #{FileUtils::mkdir_p("#{dir}/#{t}")}"
     end
     
     Dir.chdir(dir) { |p|
+      env_export = "#{ENV_CMD} popo_target=#{target} popo_path=#{root_path}/#{dir}"
+      source_cmd = "source #{root_path}/#{dir}/#{POPO_WORK_PATH}/scripts/envrc; rvm install #{@rvm_stable}"
+      rc_cmd = "#{env_export} #{BASH_CMD} -c '#{source_cmd}'"
+      
       # install stable rvm package
-      popo_puts "Installing ree-1.8.7...Patiently wait."
-      cmd = "popo rvm install ree-1.8.7"
+      popo_puts "[Installing #{@rvm_stable}]"
+      cmd = "#{rc_cmd}"
       docmd(cmd)
-
-      # set ree as rvm default
-      docmd("popo rvm --default ree-1.8.7")
+      
+      # set stable rvm as rvm default
+      source_cmd = "source #{root_path}/#{dir}/#{POPO_WORK_PATH}/scripts/envrc; rvm --default #{@rvm_stable}"
+      rc_cmd = "#{env_export} #{BASH_CMD} -c '#{source_cmd}'"
+      docmd(rc_cmd)
     }  
   end
 
-  # this takes care of writing the yaml files needed
-  def self.yml_write(root_path, dir, target, name)
-    default_yml = File.expand_path(File.join(root_path, dir, POPO_WORK_PATH, "#{name}-defaults.yml"))
-    default_config = File.read(default_yml)
-    default_config.gsub!("%target%", target)
+  def self.configure(root_path, target, options)
+    dir = options[:dir] || nil
+    user = options[:user] || ENV['USER']
+    src = "#{@src_conf}/#{target}" rescue options[:source]
+    
+    cmd = "wget #{src} -r --level=1 --user=#{user} --ask-password -nd -P #{root_path}/#{dir}/#{target} -A *.yml"
+    popo_puts "[Downloading defaults]"
+    docmd(cmd)
 
-    name_yml = File.expand_path(File.join(root_path, dir, POPO_WORK_PATH, "#{name}.yml"))
-    File.open(name_yml, 'w') { |f| f.write(default_config) }
-    popo_puts "Written #{File.basename(name_yml)}"
+    # configure yml file
+    Dir.entries("#{root_path}/#{dir}/#{target}").each do |d|
+      if d.match(/.yml/)
+        f = File.read("#{root_path}/#{dir}/#{target}/#{d}")
+        f.gsub!(/%user%/, user)
+        f.gsub!(/%target%/, target)
+        f.gsub!(/%gem_repo%/, @gem_repo)
+        d.gsub!(/-defaults/, '')
+
+        File.open("#{root_path}/#{dir}/#{POPO_WORK_PATH}/#{d}", "w") do |file|
+          file.write(f)
+        end
+      end
+    end
+    FileUtils.rm_rf("#{root_path}/#{dir}/#{target}")
   end
-
   
   def self.docmd(cmd)
     l.debug { "`#{cmd}`" }
@@ -144,32 +186,55 @@ module Popo
 end
 
 if __FILE__ == $0
+  options = {}
+  optparse = OptionParser.new do |opts|
+    opts.banner = "Popo command utility\n" +
+      "  Usage: popo command\n" +
+      "  Commands: #{COMMANDS.join(' ')}"
+
+    opts.separator "Options:"
+
+    opts.on('-d', '--directory DIRECTORY', 'Target directory') do |dir|
+      options[:dir] = dir
+    end
+
+    opts.on('-t', '--target TARGET', 'Targets(staging, beta, development, production') do |target|
+      options[:target] = target
+    end
+
+    opts.on('-s', '--source URL', 'The URL for loading the defaults') do |source|
+      options[:source] = source
+    end
+
+    opts.on('-u', '--user USER', 'Username') do |user|
+      options[:user] = user
+    end                
+  end
+  
+  optparse.parse!
   root_path = Dir.pwd
   Popo.check_requirements!
+  
   begin
     Popo.require_relative_work_popo(root_path) if Popo.in_popo?(root_path)
   rescue LoadError
   end
 
-  opts = OpenStruct.new
-  opts_parse = OptionParser.new do |o|
-    o.banner = "Popo command utility\n" +
-      "  Usage: popo command\n" +
-      "  Commands: #{COMMANDS.join(' ')}"
-
-    o.separator ""
-  end
-
+  Popo.load_config
   argv = ARGV.dup
 
   command = argv[0]
   case command
   when nil, ''
-    puts opts_parse.help
+    puts optparse.help
   when 'init'
-    Popo.init(root_path, argv)
+    unless options.empty?
+      Popo.init(root_path, options)
+    else
+      puts optparse.help
+    end
   when 'version'
-    Popo.fail_exit 'popo ' + POPO_VERSION
+     Popo.fail_exit 'popo ' + POPO_VERSION
   else
     if Popo.in_popo?(root_path)
       l.debug "Working path: #{root_path}"
@@ -177,7 +242,7 @@ if __FILE__ == $0
       when 'wipe'
         Popo.wipe(root_path, argv)
       else
-        Popo.commands(root_path, opts, opts_parse, argv)
+        Popo.commands(root_path, options, optparse, argv)
       end
     else
       $stderr.puts "You don't seem to be in a popoized directory. Perhaps popo init first? Aborting."
