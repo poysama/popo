@@ -7,10 +7,11 @@ require 'yaml'
 require 'fileutils'
 
 POPO_VERSION = "2.0"
-CONFIG_FILE_PATH = "/etc/popo.yml"
+DEFAULT_CONFIG_FILE = "popo_config.yml"
 POPO_WORK_PATH = ".popo"
 POPO_YML_FILE = "popo.yml"
-POPO_CONFIG = { }
+POPO_LOCAL_YML_FILE = "popo-local.yml"
+POPO_COIG = { }
 COMMANDS = %w{ init wipe version}
 GIT_CMD = `which git`.strip
 ENV_CMD = `which env`.strip
@@ -28,8 +29,15 @@ module Popo
   end
 
   def self.load_config
-    if File.exist? CONFIG_FILE_PATH
-      c = YAML.load_file("/etc/popo.yml")
+    if File.exist?("#{ENV['HOME']}/.#{DEFAULT_CONFIG_FILE}")
+      config_file_path = "#{ENV['HOME']}/.#{DEFAULT_CONFIG_FILE}"
+    else
+      config_file_path = "/etc/#{DEFAULT_CONFIG_FILE}"
+    end
+
+    puts config_file_path
+    if File.exist? config_file_path
+      c = YAML.load_file(config_file_path)
       cfg = c['popo']
       @popo_git = cfg['git_repo']
       @rvm_repo = cfg['rvm_repo']
@@ -39,7 +47,7 @@ module Popo
       @rvm_stable = cfg['rvm_stable']
       @gem_repo = cfg['gem_repo']
     else
-      fail_exit "Config file not found in #{CONFIG_FILE_PATH}"
+      fail_exit "Config file not found in #{config_file_path}"
     end
   end
   
@@ -150,8 +158,11 @@ module Popo
     src = "#{@src_conf}/#{target}" rescue options[:source]
     
     cmd = "wget #{src} -r --level=1 --user=#{user} --ask-password -nd -P #{root_path}/#{dir}/#{target} -A *.yml"
+  
     popo_puts "[Downloading defaults]"
     docmd(cmd)
+
+    cmd_status = `echo $?`
 
     # configure yml file
     Dir.entries("#{root_path}/#{dir}/#{target}").each do |d|
@@ -168,7 +179,7 @@ module Popo
       end
     end
     FileUtils.rm_rf("#{root_path}/#{dir}/#{target}")
-  end
+1  end
   
   def self.docmd(cmd)
     l.debug { "`#{cmd}`" }
