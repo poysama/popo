@@ -1,13 +1,12 @@
 # add additional commands for the originally loaded popo
 
-COMMANDS.concat %w{ bash rvm info status cable reset}
+COMMANDS.concat %w{ bash rvm info status cable reconfigure rvm_update}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
 POPORC = 'scripts/poporc'
 GIT_REPO = 'git@git.caresharing.eu'
 POPO_ROOT = ENV['popo_path']
-VALID_MODS = { 'frameworks' => 'f', 'plugins' => 'p', 'apps' => 'a' }
 
 module Popo
   def self.commands(root_path, options, optparse, argv = [ ])
@@ -26,21 +25,10 @@ module Popo
       Popo.rvm_update
     when 'cable'
       Popo.cable
-    when 'reset'
-      if ENV['popo_target'].eql? 'production'
-        popo_puts "[Popo]: You cannot reset in production mode"
-      else
-        Popo.reset
-      end
-      #fail_exit "Reset is disabled."
     when 'clone'
       Popo.clone(argv)
-    when 'configure'
-      root_path = root_path.split('/')
-      options[:dir] = root_path.pop
-      root_path = root_path.join('/')
-      puts root_path.inspect
-      Popo.configure(root_path, POPO_CONFIG['target'], options)
+    when 'reconfigure'
+      Popo.reconfigure(root_path, options)
     else
       puts "FAIL me not know some command #{argv[0]}\n\n"
       puts opts_parse.help
@@ -98,77 +86,66 @@ module Popo
   end
 
   def self.cable
-    begin
-      poop_yml = YAML::load_file(ENV['popo_path'] + '/.popo/poop.yml')
-      if poop_yml['apps'].nil?
-        apps_list = POPO_CONFIG['apps']
-      else
-        apps_list = poop_yml['apps']
-      end
-    rescue
-      apps_list = POPO_CONFIG['apps']
-    end
-
-    apps_list.each do |app, v|
-      if File.directory? "apps/#{app}"  
-        Dir.chdir("apps/#{app}") { |p|
-          puts "Cabling #{app}....."
-          system("cable")
-        }
-      end
-    end
+    # refactor
   end
 
-  def self.reset
+  def self.reconfigure(root_path, options)
     if ENV['popo_target'].nil? || ENV['popo_path'].nil?
       fail_exit "Popo is not loaded. popo bash perhaps?"
     else
       require File.join(ENV['popo_path'], '.popo/lib/hash.rb')
     end
 
-    target = ENV['popo_target']    
-    root_path = ENV['popo_path']
-    
-    combine(root_path, target, 'cabling')
-    combine(root_path, target, 'dbget')
-    combine(root_path, target, 'popo')
-    combine(root_path, target, 'poop')
-    
-    popo_puts "[Popo]: Reset OK. May the force be with you."
+    target = POPO_CONFIG['target']
+    root_path = root_path.split('/')
+    options[:dir] = root_path.pop
+    root_path = root_path.join('/')
+    Popo.configure(root_path, target, options)
+
+    # merge
+    options[:file] = 'cabling'
+    Popo.merge(root_path, target, options)
+    options[:file] = 'popo'
+    Popo.merge(root_path, target, options)
   end
   
+  def self.merge(root_path, target, options)
+    dir = options[:dir]
+    file = options[:file]
+    root_path = "#{root_path}/#{dir}/#{POPO_WORK_PATH}"
+    
+    if File.exist? "#{root_path}/#{file}-defaults.yml"
+      defaults_file = YAML.load_file("#{root_path}/#{file}-defaults.yml")
+    else
+      fail_exit "#{file}-defaults not found."
+    end
+
+    if File.exist? "#{root_path}/#{file}-local.yml"
+      local_file = YAML.load_file("#{root_path}/#{file}-local.yml")        
+    else
+      fail_exit "#{file}-local not found."
+    end
+
+    if local_file.is_a? Hash
+      defaults_file.deep_merge! local_file
+    end
+    
+    generated_file = YAML.dump(defaults_file)
+    generated_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}. This file is auto generated and must not be edited.")
+    generated_file.gsub!(/\%target\%/, target)
+
+    File.open("#{root_path}/#{file}.yml" , "w") { |f| f.write(generated_file) }
+
+    # remove defaults file
+    FileUtils.rm("#{root_path}/#{file}-defaults.yml")
+  end
+
   def self.rvm_update
     Dir.chdir("#{POPO_ROOT}/rvm")
     system("git reset --hard")
     system("git pull")
   end
   
-  def self.combine(root_path, target, file)
-    full_root_path = "#{root_path}/.popo/#{file}"
-    begin
-      defaults_file = YAML::load_file("#{full_root_path}-defaults.yml")
-
-      current_file = YAML::load_file("#{full_root_path}.yml")
-
-      if current_file.is_a? Hash
-        defaults_file.deep_merge! current_file
-      else
-        puts "[Popo]: #{file} is empty or does not exist. Creating a new one."
-      end
-      # patch fix for new yml, these values must be removed.
-      defaults_file.delete('caresharing')
-      defaults_file.delete('palmade')
-      defaults_file.delete('git')
-      final_file = YAML::dump(defaults_file)
-      final_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}")
-      final_file.gsub!(/\%target\%/, target)
-
-      File.open(full_root_path + '.yml' , 'w') { |f| f.write(final_file) }
-    rescue
-
-    end
-  end
-
-  def self.clone(argv)
+  def self.clone
   end
 end
