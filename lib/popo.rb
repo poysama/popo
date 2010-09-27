@@ -1,6 +1,6 @@
 # add additional commands for the originally loaded popo
 
-COMMANDS.concat %w{ bash rvm info status cable reconfigure rvm_update}
+COMMANDS.concat %w{ bash rvm info status cable reconfigure rvm_update clone}
 
 BASH_BIN = `which bash`.strip
 ENV_BIN = `which env`.strip
@@ -101,7 +101,6 @@ module Popo
     options[:dir] = root_path.pop
     root_path = root_path.join('/')
     Popo.configure(root_path, target, options)
-
     # merge
     options[:file] = 'cabling'
     Popo.merge(root_path, target, options)
@@ -112,6 +111,7 @@ module Popo
   def self.merge(root_path, target, options)
     dir = options[:dir]
     file = options[:file]
+    user = options[:user] || ENV['USER']
     root_path = "#{root_path}/#{dir}/#{POPO_WORK_PATH}"
     
     if File.exist? "#{root_path}/#{file}-defaults.yml"
@@ -123,17 +123,17 @@ module Popo
     if File.exist? "#{root_path}/#{file}-local.yml"
       local_file = YAML.load_file("#{root_path}/#{file}-local.yml")        
     else
-      fail_exit "#{file}-local not found."
+      local_file = YAML.load_file("#{root_path}/#{file}.yml")
     end
-
+    
     if local_file.is_a? Hash
       defaults_file.deep_merge! local_file
     end
     
     generated_file = YAML.dump(defaults_file)
     generated_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}. This file is auto generated and must not be edited.")
-    generated_file.gsub!(/\%target\%/, target)
-
+    generated_file.gsub!(/%target%/, target)
+    generated_file.gsub!(/%user%/, user)
     File.open("#{root_path}/#{file}.yml" , "w") { |f| f.write(generated_file) }
 
     # remove defaults file
