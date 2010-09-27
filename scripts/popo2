@@ -36,7 +36,6 @@ module Popo
       config_file_path = "/etc/#{DEFAULT_CONFIG_FILE}"
     end
 
-    
     if File.exist? config_file_path
       c = YAML.load_file(config_file_path)
       cfg = c['popo']
@@ -94,10 +93,6 @@ module Popo
 
     if options[:dir].nil?
       fail_exit "Must specify target."
-    end
-
-    if options[:user].nil?
-      fail_exit "Specify a user with the -u option."
     end
     
     dir = options[:dir]
@@ -159,22 +154,32 @@ module Popo
     src = "#{@src_conf}/#{target}" rescue options[:source]
     
     cmd = "wget #{src} -r --level=1 --user=#{user} --ask-password -nd -P #{root_path}/#{dir}/#{target} -A *.yml"
-  
+   
     popo_puts "[Downloading defaults]"
-    docmd(cmd)
 
-    cmd_status = `echo $?`
+    docmd(cmd)
+    
+    if $? != 0
+      # deletes the generated directory if popo inits first
+      if ENV['popo_target'].nil? || ENV['popo_path'].nil?
+        FileUtils.rm_rf("#{root_path}/#{dir}")
+      end
+      popo_puts "[Something went wrong with fetching the default files. Rolling back]"
+      exit(-1)
+    end
 
     # configure yml file
     Dir.entries("#{root_path}/#{dir}/#{target}").each do |d|
       if d.match(/.yml/)
         f = File.read("#{root_path}/#{dir}/#{target}/#{d}")
-        unless ENV['popo_target'].nil? || ENV['popo_path'].nil?
-          FileUtils.cp("#{root_path}/#{dir}/#{target}/#{d}", "#{root_path}/#{dir}/#{POPO_WORK_PATH}/#{d}")
-        end
         f.gsub!(/%user%/, user)
         f.gsub!(/%target%/, target)
         f.gsub!(/%gem_repo%/, @gem_repo)
+        unless ENV['popo_target'].nil? || ENV['popo_path'].nil?
+          File.open("#{root_path}/#{dir}/#{POPO_WORK_PATH}/#{d}", "w") do |file|
+            file.write(f)
+          end
+        end
         d.gsub!(/-defaults/, '')
 
         File.open("#{root_path}/#{dir}/#{POPO_WORK_PATH}/#{d}", "w") do |file|
@@ -240,10 +245,9 @@ if __FILE__ == $0
     Popo.require_relative_work_popo(root_path) if Popo.in_popo?(root_path)
   rescue LoadError
   end
-
   Popo.load_config
   argv = ARGV.dup
-
+  
   command = argv[0]
   case command
   when nil, ''
