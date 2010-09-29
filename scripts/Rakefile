@@ -45,7 +45,7 @@ task :deploy do
   popo_puts "Done!"
 
   popo_puts "Generating index on deb repo..."
-  system "ssh root@styx.caresharing /var/www/caresharing/generate_index" 
+  system "ssh root@styx.caresharing \"cd /var/www/caresharing; ./generate_index\"" 
   popo_puts "Done!"
 end
 
