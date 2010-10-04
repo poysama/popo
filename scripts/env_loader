@@ -19,7 +19,6 @@ end
 
 cmd = ARGV.join(' ')
 
-finale = "#{ENV_PATH} popo_path=#{popo_path} #{BASH_PATH} -c 'source #{envrc}; cd #{popo_path}; #{cmd}'"
-#puts finale
+finale = "#{ENV_PATH} popo_path=#{popo_path} popo_target=#{popo_target} #{BASH_PATH} -c 'source #{envrc}; cd #{popo_path}; #{cmd}'"
+puts finale
 exec(finale)
-

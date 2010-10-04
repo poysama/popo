@@ -1,15 +1,15 @@
-load 'popo'
+load 'popo2'
 
 POPO_PACKAGE_VERSION = 1
-POPO_PACKAGE_NAME = "popo-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
+POPO_PACKAGE_NAME = "popo2-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
 
 def control_file
-  "Package: popo\n" +
+  "Package: popo2\n" +
   "Version: #{POPO_VERSION}-#{POPO_PACKAGE_VERSION}\n" +
   "Section: Caresharing Tools\n" +
   "Priority: optional\n" +
   "Architecture: all\n" +
-  "Depends: ruby, git-core, libcurl4-dev, libmysqlclient-dev, libreadline-dev, curl, libssl-dev, g++, libmagickcore-dev\n" +
+  "Depends: ruby, git-core, curl, g++\n" +
   "Maintainer: Caresharing Framework Team <framework@caresharing.eu>\n" +
   "Description: Popo utilities\n" +
   " Popo allows you to easily deploy and configure Caresharing applications"
@@ -24,7 +24,10 @@ task :deb do
   popo_puts "Packaging popo version #{POPO_VERSION} as deb..."
 
   system "mkdir -p #{POPO_PACKAGE_NAME}/usr/bin"
-  system "cp popo #{POPO_PACKAGE_NAME}/usr/bin"
+  system "cp popo2 #{POPO_PACKAGE_NAME}/usr/bin"
+
+  system "mkdir -p #{POPO_PACKAGE_NAME}/etc"
+  system "cp popo_config.yml #{POPO_PACKAGE_NAME}/etc"
 
   system "mkdir -p #{POPO_PACKAGE_NAME}/DEBIAN"
   system "echo \"#{control_file}\" > #{POPO_PACKAGE_NAME}/DEBIAN/control"
@@ -42,7 +45,7 @@ task :deploy do
   popo_puts "Done!"
 
   popo_puts "Generating index on deb repo..."
-  system "ssh root@styx.caresharing /var/www/caresharing/generate_index" 
+  system "ssh root@styx.caresharing \"cd /var/www/caresharing; ./generate_index\"" 
   popo_puts "Done!"
 end
 
