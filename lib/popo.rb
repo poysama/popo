@@ -86,7 +86,14 @@ module Popo
   end
 
   def self.cable
-    # refactor
+    Dir.entries("#{POPO_ROOT}/apps").each do |d|
+      unless (d.eql? '..') || (d.eql? '.')
+        Dir.chdir("#{POPO_ROOT}/apps/#{d}") do
+          popo_puts "Cabling #{d}"
+          system("cable")
+        end
+      end
+    end
   end
 
   def self.reconfigure(root_path, options)
