@@ -1,10 +1,10 @@
-load 'popo2'
+load 'popo'
 
 POPO_PACKAGE_VERSION = 1
 POPO_PACKAGE_NAME = "popo2-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
 
 def control_file
-  "Package: popo2\n" +
+  "Package: popo\n" +
   "Version: #{POPO_VERSION}-#{POPO_PACKAGE_VERSION}\n" +
   "Section: Caresharing Tools\n" +
   "Priority: optional\n" +
@@ -24,7 +24,7 @@ task :deb do
   popo_puts "Packaging popo version #{POPO_VERSION} as deb..."
 
   system "mkdir -p #{POPO_PACKAGE_NAME}/usr/bin"
-  system "cp popo2 #{POPO_PACKAGE_NAME}/usr/bin"
+  system "cp popo #{POPO_PACKAGE_NAME}/usr/bin"
 
   system "mkdir -p #{POPO_PACKAGE_NAME}/etc"
   system "cp popo_config.yml #{POPO_PACKAGE_NAME}/etc"
