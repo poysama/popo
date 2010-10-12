@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 if [[ -z "$popo_path" ]] ; then
     echo "FAIL Please set the popo_path environment var"
     exit -1
@@ -12,7 +13,8 @@ fi
 
 SHIT="\[\033[33m\]"
 NORMAL="\[\033[0;0m\]"
-
+BASEPATH=`which basename`
+BASENAME=`$BASEPATH $popo_path`
 if [[ $PS1 != "" ]] ; then
     if [[ -f /etc/bash.bashrc ]] ; then
         source /etc/bash.bashrc
@@ -22,7 +24,11 @@ if [[ $PS1 != "" ]] ; then
         source $HOME/.bashrc
     fi
 
-    export PS1="$SHIT(popo $popo_target) $NORMAL$PS1"
+    if [[ $BASENAME != $popo_target ]] ; then
+      export PS1="$SHIT(popo $popo_target/$BASENAME) $NORMAL$PS1"
+    else
+      export PS1="$SHIT(popo $popo_target) $NORMAL$PS1"
+    fi
 fi
 
 # Let's unload system installed rvm and move path prefix to popo
