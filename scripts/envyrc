@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# Let's unload system installed rvm and move path prefix to popo
+unset $(env | awk -F= '/^rvm_/{print $1" "}')
+export rvm_reload_flag=1
+export rvm_prefix=$popo_path
+
+
+# Now let's load rvm inside popo
+source $rvm_prefix/rvm/scripts/rvm
+
+# Load default rvm
+rvm default 1>/dev/null 2>&1
+unset PALMADE_GEMS_DIR
+export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
+
+# this section is for backup
+#unset PALMADE_GEMS_DIR
+#unset rvm_loaded_flag
+#rvm_loaded_flag=1
+#export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
+#export rvm_prefix=$popo_path
+#export rvm_path=$popo_path/rvm
+#export rvm_scripts_path=$rvm_path/scripts
+#export rvm_archives_path=$rvm_path/archives
+#export rvm_src_path=$rvm_path/src
+#export rvm_log_path=$rvm_path/log
+#export rvm_bin_path=$rvm_path/bin
+#export rvm_gems_path=$rvm_path/gems
+#export rvm_hooks_path=$rvm_path/hooks
+#export rvm_tmp_path=$rvm_path/tmp
+#export rvm_gemsets_path=$rvm_path/gemsets
+#export rvm_bin_path=$rvm_path/bin
+#export rvm_patchsets_path=$rvm_path/patchsets
+#export rvm_patches_path=$rvm_path/patches
+#export rvm_gems_cache_path=$rvm_path/gems/cache
+#export rvm_config_path=$rvm_path/config
+#export rvm_rubies_path=$rvm_path/rubies
+#export rvm_gems_path=$rvm_path/gems
+#export rvm_repo_path=$rvm_path/repos
+#unset rvm_loaded_flag
+#source $rvm_scripts_path/rvm
+#rvm default 1>/dev/null 2>&1

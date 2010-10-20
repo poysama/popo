@@ -1,7 +1,7 @@
 load 'popo'
 
 POPO_PACKAGE_VERSION = 1
-POPO_PACKAGE_NAME = "popo2-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
+POPO_PACKAGE_NAME = "popo-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
 
 def control_file
   "Package: popo\n" +
