@@ -16,7 +16,7 @@ def control_file
 end
 
 def popo_puts(message)
-  puts "\e[33m#{message}\e[0;0m"  
+  puts "\e[33m#{message}\e[0;0m"
 end
 
 desc "Creates a debian package of popo"
@@ -26,8 +26,8 @@ task :deb do
   system "mkdir -p #{POPO_PACKAGE_NAME}/usr/bin"
   system "cp popo #{POPO_PACKAGE_NAME}/usr/bin"
 
-  system "mkdir -p #{POPO_PACKAGE_NAME}/etc"
-  system "cp popo_config.yml #{POPO_PACKAGE_NAME}/etc"
+#  system "mkdir -p #{POPO_PACKAGE_NAME}/etc"
+#  system "cp popo_config.yml #{POPO_PACKAGE_NAME}/etc"
 
   system "mkdir -p #{POPO_PACKAGE_NAME}/DEBIAN"
   system "echo \"#{control_file}\" > #{POPO_PACKAGE_NAME}/DEBIAN/control"
@@ -41,11 +41,11 @@ end
 desc "Deploys debian package to remote deb repository"
 task :deploy do
   popo_puts "Copying deb package to remote server..."
-  system "scp #{POPO_PACKAGE_NAME}.deb root@styx.caresharing:/var/www/caresharing/" 
+  system "scp #{POPO_PACKAGE_NAME}.deb root@styx.caresharing:/var/www/caresharing/"
   popo_puts "Done!"
 
   popo_puts "Generating index on deb repo..."
-  system "ssh root@styx.caresharing \"cd /var/www/caresharing; ./generate_index\"" 
+  system "ssh root@styx.caresharing \"cd /var/www/caresharing; ./generate_index\""
   popo_puts "Done!"
 end
 
