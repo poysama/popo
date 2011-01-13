@@ -156,7 +156,11 @@ module Popo
 
     src = "#{@src_conf}/#{manifest}" rescue options[:source]
 
-    cmd = "wget #{src} -r -q --level=1 --user=#{user} --http-password \`cat #{ENV['HOME']}/.popo_password\` -nd -P #{root_path}/#{dir}/#{manifest} -A *.yml"
+    if File.exist?(File.join(ENV['HOME'], '.popo_password')) and File.size?(File.join(ENV['HOME'], '.popo_password')) != nil
+      cmd = "wget #{src} -r -q --level=1 --user=#{user} --http-password \`cat #{ENV['HOME']}/.popo_password\` -nd -P #{root_path}/#{dir}/#{manifest} -A *.yml"
+    else
+      cmd = "wget #{src} -r -q --level=1 --user=#{user} --ask-password -nd -P #{root_path}/#{dir}/#{manifest} -A *.yml"
+    end
 
     popo_puts "[Downloading defaults]"
 
