@@ -1,0 +1,15 @@
+repo:
+  popo: jan@localhost:/opt/popo.git
+  rvm: jan@git.caresharing:popo/rvm.git
+  tools: jan@git.caresharing:popo/tools.git
+manifest:
+  source: https://popo.caresharing.eu
+rvm:
+  rubies: [ree-1.8.7-2010.01, ruby-1.9.2]
+  default: ree-1.8.7-2010.01
+popo:
+  tree: [ 'apps', 'assets', 'frameworks', 'plugins', 'helpers', 'external', 'configs', 'out/logs', 'out/tmp/pids', 'out/tmp/caches', 'libwww']
+  default_target: development
+gems:
+  source: http://gems.caresharing.eu
+

@@ -1,158 +1,154 @@
-# add additional commands for the originally loaded popo
-
-COMMANDS.concat %w{ bash rvm info status cable reconfigure rvm_update clone}
-
-BASH_BIN = `which bash`.strip
-ENV_BIN = `which env`.strip
-POPORC = 'scripts/poporc'
-GIT_REPO = 'git@git.caresharing.eu'
-POPO_ROOT = ENV['popo_path']
-
 module Popo
-  def self.commands(root_path, options, optparse, argv = [ ])
-    case argv[0]
-    when 'sync'
-      Popo.sync(root_path)
-    when 'info'
-      Popo.info(root_path)
-    when 'status'
-      Popo.status(root_path)
-    when 'bash'
-      Popo.bash(root_path)
-    when 'rvm'
-      Popo.rvm(root_path, argv)
-    when 'rvm_update'
-      Popo.rvm_update
-    when 'cable'
-      Popo.cable
-    when 'clone'
-      Popo.clone(argv)
-    when 'reconfigure'
-      Popo.reconfigure(root_path, options)
-    else
-      puts "FAIL me not know some command #{argv[0]}\n\n"
-      puts opts_parse.help
-    end
-  end
+  WGET_BIN = `which wget`.strip
+  POPORC = 'script/poporc'
+  POPO_VERSION = "1.1"
+  DEFAULT_CONFIG_FILE = "popo_config.yml"
+  POPO_WORK_PATH = ".popo"
+  POPO_YML_FILE = "popo.yml"
+  POPO_CONFIG = { }
+  COMMANDS = %w{ init wipe version }
+  GIT_CMD = `which git`.strip
+  ENV_CMD = `which env`.strip
+  BASH_CMD = `which bash`.strip
+  POPO_LIB_ROOT = File.join(File.dirname(__FILE__), 'popo')
 
-  def self.check_extended_requirements!
-    
-  end
+  autoload :Initializer, (File.join(POPO_LIB_ROOT, 'initializer'))
+  autoload :Runner, (File.join(POPO_LIB_ROOT, 'runner'))
+  autoload :Utils, (File.join(POPO_LIB_ROOT, 'utils'))
+  autoload :Deployer, (File.join(POPO_LIB_ROOT, 'deployer'))
 
-  def self.info(root_path)
-    info = {
-      "Work Path" => root_path,
-      "Target" => POPO_CONFIG["target"]
-    }
+  class Popoized
 
-    info.each do |k,v|
-      puts "#{k}: #{v}"
-    end
-  end
+    def self.info(root_path)
+      info = {
+        "Work Path" => root_path,
+        "Target" => POPO_CONFIG["target"]
+      }
 
-  def self.status(root_path)
-    puts "Gathering status info, please be patient, this can take a while on a pathetic machine..."
-    $stdout.flush
-  end
-
-  def self.bash(root_path)
-    if BASH_BIN.nil? || BASH_BIN.empty?
-      fail_exit! "FAIL bash is nowhere to be found"
+      info.each do |k,v|
+        Popo::Utils.popo_puts "#{k}: #{v}"
+      end
     end
 
-    if ENV_BIN.nil? || ENV_BIN.empty?
-      fail_exit! "FAIL env is nowhere to be found"
+    def self.status(root_path)
+      puts "Gathering status info, please be patient, this can take a while on a pathetic machine..."
+      $stdout.flush
     end
 
-    target = POPO_CONFIG['target']
-    bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{BASH_BIN} --rcfile #{File.join(root_path, POPO_WORK_PATH, POPORC)}"
-    exec(bashcmd)
-  end
+    def self.bash(root_path)
+      if BASH_CMD.nil? || BASH_CMD.empty?
+        Popo::Utils.popo_puts("FAIL bash is nowhere to be found", {:sub => true, :err => true})
+      end
 
-  def self.rvm(root_path, argv)
-    if ENV_BIN.nil? || ENV_BIN.empty?
-      fail_exit! "FAIL env is nowhere to be found"
+      if ENV_CMD.nil? || ENV_CMD.empty?
+        Popo::Utils.popo_puts("FAIL env is nowhere to be found", {:sub => true, :err => true})
+      end
+
+      target = POPO_CONFIG['target']
+      bashcmd = "#{ENV_CMD} popo_target=#{target} popo_path=#{root_path} #{BASH_CMD} --rcfile #{File.join(root_path, POPO_WORK_PATH, POPORC)}"
+      exec(bashcmd)
     end
 
-    target = POPO_CONFIG['target']
-    poporc_path = File.join(root_path, POPO_WORK_PATH, POPORC)
+    def self.rvm(root_path, argv)
+      if ENV_CMD.nil? || ENV_CMD.empty?
+        Popo::Utils.popo_puts("FAIL env is nowhere to be found", {:sub => true, :err => true})
+      end
 
-    if argv.size > 1
-      bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{poporc_path} #{argv[1..-1].join(' ')}"
-    else
-      bashcmd = "#{ENV_BIN} popo_target=#{target} popo_path=#{root_path} #{poporc_path}"
+      target = POPO_CONFIG['target']
+      poporc_path = File.join(root_path, POPO_WORK_PATH, POPORC)
+
+      if argv.size > 1
+        bashcmd = "#{ENV_CMD} popo_target=#{target} popo_path=#{root_path} #{poporc_path} #{argv[1..-1].join(' ')}"
+      else
+        bashcmd = "#{ENV_CMD} popo_target=#{target} popo_path=#{root_path} #{poporc_path}"
+      end
+      exec(bashcmd)
     end
-    exec(bashcmd)
-  end
 
-  def self.cable
-    Dir.entries("#{POPO_ROOT}/apps").each do |d|
-      unless (d.eql? '..') || (d.eql? '.')
-        Dir.chdir("#{POPO_ROOT}/apps/#{d}") do
-          popo_puts "Cabling #{d}"
-          system("cable")
+    def self.get_manifest(root_path, options)
+      if WGET_BIN.nil? || WGET_BIN.empty?
+        Popo::Utils.popo_puts("FAIL wget is nowhere to be found", {:sub => true, :err => true})
+      end
+
+      config = options[:config]
+      target = options[:target] || config['popo']['default_target']
+      manifest = [config['manifest']['source'], target].join('/')
+      user = options[:user] || ENV['USER']
+      path = options[:path] ? File.join(root_path, options[:path]) : root_path
+
+      if File.exist?(File.join(ENV['HOME'], '.popo_password')) and File.size?(File.join(ENV['HOME'], '.popo_password')) != nil
+        cmd = "#{WGET_BIN} -nv #{manifest} -r --level=1 --user=#{user}"
+        cmd += " --http-password \`cat #{ENV['HOME']}/.popo_password\`"
+        cmd += " -nd -P #{path} -A *.yml"
+      else
+        cmd = "#{WGET_BIN} -nv #{manifest} -r --level=1 --user=#{user}"
+        cmd += " --ask-password -nd -P #{path} -A *.yml"
+      end
+
+      Popo::Utils.popo_puts("Downloading manifest file...")
+
+      system cmd
+      move_yml_files(path)
+
+      Popo::Utils.popo_puts("Configure OK!")
+    end
+
+    def self.move_yml_files(path)
+      Dir.entries(path).each do |file|
+        if file.match(/.yml$/)
+          chopped_file = file.sub('-defaults', '')
+          FileUtils.mv(File.join(path, file), File.join(path, POPO_WORK_PATH, file))
+          create_local(path, chopped_file)
+          merge_config(path, file)
+          FileUtils.rm(File.join(path, POPO_WORK_PATH, file))
+        else
+          error_msg = "Manifest file download failed."
+          echo_opts = {:sub => true, :err => true, :undo => true, :path => path}
+          Popo::Utils.popo_puts(error_msg, echo_opts) if $? != 0
         end
       end
     end
-  end
 
-  def self.reconfigure(root_path, options)
-    if ENV['popo_target'].nil? || ENV['popo_path'].nil?
-      fail_exit "Popo is not loaded. popo bash perhaps?"
-    else
-      require File.join(ENV['popo_path'], '.popo/lib/hash.rb')
+    def self.reconfigure(root_path, options)
+      get_manifest(root_path, options)
+      replace_popo_user(root_path, options)
     end
 
-    target = POPO_CONFIG['target']
-    root_path = root_path.split('/')
-    options[:dir] = root_path.pop
-    root_path = root_path.join('/')
-    Popo.configure(root_path, target, options)
-    # merge
-    options[:file] = 'cabling'
-    Popo.merge(root_path, target, options)
-    options[:file] = 'popo'
-    Popo.merge(root_path, target, options)
-  end
-  
-  def self.merge(root_path, target, options)
-    dir = options[:dir]
-    file = options[:file]
-    user = options[:user] || ENV['USER']
-    root_path = "#{root_path}/#{dir}/#{POPO_WORK_PATH}"
-    
-    if File.exist? "#{root_path}/#{file}-defaults.yml"
-      defaults_file = YAML.load_file("#{root_path}/#{file}-defaults.yml")
-    else
-      fail_exit "#{file}-defaults not found."
+    def self.replace_popo_user(root_path, options)
+      target_path = options[:path] || root_path
+      user = options[:user] || ENV['USER']
+
+      popo_yml = File.read(File.join(target_path, POPO_WORK_PATH, 'popo.yml'))
+
+      popo_yml.gsub!('%user%', user) # for gerrit user specific repos
+
+      File.open(File.join(target_path, POPO_WORK_PATH, 'popo.yml'), 'w') {|f| f.write(popo_yml) }
     end
 
-    if File.exist? "#{root_path}/#{file}-local.yml"
-      local_file = YAML.load_file("#{root_path}/#{file}-local.yml")        
-    else
-      local_file = YAML.load_file("#{root_path}/#{file}.yml")
+    def self.create_local(path, file)
+      FileUtils.touch(File.join(path, POPO_WORK_PATH, "#{file.chomp('.yml')}-local.yml"))
     end
-    
-    if local_file.is_a? Hash
-      defaults_file.deep_merge! local_file
+
+    def self.merge_config(path, file)
+      yml_msg = "# Generated #{file}.yml #{Time.now}.\n"
+      yml_msg += "# This file is auto generated and must not be edited.\n"
+      yml_msg += "# All local edits are in respective -local files\n"
+      yml_msg += "# and must be reconfigured to take effect.\n"
+
+      work_path = File.join(path, POPO_WORK_PATH)
+
+      local_file = YAML.load_file(File.join(work_path, "#{file.chomp('-defaults.yml')}-local.yml"))
+      default_file = YAML.load_file(File.join(work_path, file))
+
+      if local_file.is_a?(Hash)
+        default_file.deep_merge!(local_file)
+      end
+
+      dump_file = YAML.dump(default_file)
+      dump_file.gsub!(/---/, yml_msg)
+
+      File.open(File.join(work_path, "#{file.chomp('-defaults.yml')}.yml"), 'w') {|f| f.write(dump_file) }
     end
-    
-    generated_file = YAML.dump(defaults_file)
-    generated_file.gsub!(/^---/,"# Generated #{file}.yml #{Time.now}. This file is auto generated and must not be edited.")
-    generated_file.gsub!(/%target%/, target)
-    generated_file.gsub!(/%user%/, user)
-    File.open("#{root_path}/#{file}.yml" , "w") { |f| f.write(generated_file) }
-
-    # remove defaults file
-    FileUtils.rm("#{root_path}/#{file}-defaults.yml")
-  end
-
-  def self.rvm_update
-    Dir.chdir("#{POPO_ROOT}/rvm")
-    system("git reset --hard")
-    system("git pull")
-  end
-  
-  def self.clone
   end
 end
+

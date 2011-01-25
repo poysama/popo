@@ -1,0 +1,4 @@
+# sample
+popo_path: %popo_path%
+popo_target: %popo_target%
+envyrc_path: script/envyrc

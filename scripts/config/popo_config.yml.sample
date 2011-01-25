@@ -1,9 +1,0 @@
-# default popo config; used in popo init
-popo:
-  git_repo: git@git.caresharing.eu:popo/popo.git
-  rvm_repo: git@git.caresharing.eu:popo/rvm.git
-  tools_repo: git@git.caresharing.eu:popo/tools.git
-  src_conf: https://popo.caresharing.eu
-  rvm_stable: ree-1.8.7
-  dir_list: [ 'apps', 'assets', 'frameworks', 'plugins', 'helpers', 'external', 'configs', 'out/logs', 'out/tmp/pids', 'out/tmp/caches', 'libwww']
-  gem_repo: http://gems.caresharing.eu

@@ -1,0 +1,54 @@
+#! /usr/bin/env ruby
+
+require File.join(File.dirname(__FILE__), '../lib/popo')
+require File.join(File.dirname(__FILE__), '../lib/hash')
+require 'optparse'
+require 'yaml'
+require 'fileutils'
+
+options = {}
+
+optparse = OptionParser.new do |opts|
+  opts.banner = "Popo tool."
+
+  opts.separator "Options:"
+
+  opts.on('-p', '--path PATH', 'Target path') do |path|
+    options[:path] = path
+  end
+
+  opts.on('-t', '--target TARGET', 'Deployment target') do |target|
+    options[:target] = target
+  end
+
+  opts.on('-u', '--user USER', 'Username') do |user|
+    options[:user] = user
+  end
+
+  opts.on('-m', '--manifest MANIFEST', 'Deployment target manifesto') do |manifest|
+    options[:manifest] = manifest
+  end
+
+  opts.on('-s', '--source URL', 'Source for manifest') do |source|
+    options[:source] = source
+  end
+
+  opts.on('-n', '--no-color', 'Turn off shell colors') do |color|
+    ENV['popo_no_color'] = ''
+  end
+
+  opts.on('-h', '--help', 'Display this screen') do
+    puts opts
+    exit
+  end
+end
+
+optparse.parse!
+
+if ARGV.length > 0
+  args = ARGV.dup
+  Popo::Initializer.boot(args, options)
+else
+  puts optparse.help
+end
+
