@@ -23,7 +23,6 @@ module Popo
 
     def self.clone(what)
       custom_path =  what.chomp('.git').split('/').last
-
       target_path = File.join(@target_path, custom_path)
 
       Popo::Utils.popo_puts("Deploying #{custom_path}")
@@ -37,7 +36,7 @@ module Popo
       system cmd unless cmd.nil?
 
       # move popo repo to hidden
-      unless File.exist? File.join(@target_path, '.popo')
+      if File.exist? File.join(@target_path, 'popo')
         FileUtils.mv(File.join(@target_path, 'popo'), File.join(@target_path, '.popo'))
       end
     end

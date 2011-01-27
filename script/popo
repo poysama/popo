@@ -1,7 +1,7 @@
 #! /usr/bin/env ruby
 
-require File.join(File.dirname(__FILE__), '../lib/popo')
-require File.join(File.dirname(__FILE__), '../lib/hash')
+require File.join(File.dirname(__FILE__), '.popo/lib/popo')
+require File.join(File.dirname(__FILE__), '.popo/lib/hash')
 require 'optparse'
 require 'yaml'
 require 'fileutils'
