@@ -1,7 +1,7 @@
 module Popo
   WGET_BIN = `which wget`.strip
   POPORC = 'script/poporc'
-  POPO_VERSION = "1.1"
+  POPO_VERSION = "1.2"
   DEFAULT_CONFIG_FILE = "popo_config.yml"
   POPO_WORK_PATH = ".popo"
   POPO_YML_FILE = "popo.yml"
@@ -72,7 +72,7 @@ module Popo
 
       config = options[:config]
       target = options[:target] || config['popo']['default_target']
-      manifest = [config['manifest']['source'], target].join('/')
+      manifest = [config['manifest']['source'], options[:manifest]].join('/')
       user = options[:user] || ENV['USER']
       path = options[:path] ? File.join(root_path, options[:path]) : root_path
 

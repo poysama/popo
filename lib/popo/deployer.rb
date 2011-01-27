@@ -22,11 +22,7 @@ module Popo
     end
 
     def self.clone(what)
-      if what.include? 'popo.git'
-        custom_path = '.' + what.chomp('.git').split('/').last
-      else
-        custom_path =  what.chomp('.git').split('/').last
-      end
+      custom_path =  what.chomp('.git').split('/').last
 
       target_path = File.join(@target_path, custom_path)
 
@@ -39,6 +35,11 @@ module Popo
       end
 
       system cmd unless cmd.nil?
+
+      # move popo repo to hidden
+      unless File.exist? File.join(@target_path, '.popo')
+        FileUtils.mv(File.join(@target_path, 'popo'), File.join(@target_path, '.popo'))
+      end
     end
 
     def self.configure_envy
