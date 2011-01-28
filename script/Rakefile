@@ -1,5 +1,4 @@
-load 'popo'
-
+POPO_VERSION = 1.2
 POPO_PACKAGE_VERSION = 1
 POPO_PACKAGE_NAME = "popo-#{POPO_VERSION}-#{POPO_PACKAGE_VERSION}_all"
 
@@ -23,8 +22,10 @@ desc "Creates a debian package of popo"
 task :deb do
   popo_puts "Packaging popo version #{POPO_VERSION} as deb..."
 
-  system "mkdir -p #{POPO_PACKAGE_NAME}/usr/bin"
-  system "cp popo #{POPO_PACKAGE_NAME}/usr/bin"
+  system "mkdir -p #{POPO_PACKAGE_NAME}/usr/local/bin"
+  system "cp popo #{POPO_PACKAGE_NAME}/usr/local/bin"
+  system "cp -r ../../popo /tmp/.popo"
+  system "mv /tmp/.popo #{POPO_PACKAGE_NAME}/usr/local/bin"
 
 #  system "mkdir -p #{POPO_PACKAGE_NAME}/etc"
 #  system "cp popo_config.yml #{POPO_PACKAGE_NAME}/etc"
