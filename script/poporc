@@ -35,6 +35,7 @@ fi
 unset $(env | awk -F= '/^rvm_/{print $1" "}')
 export rvm_reload_flag=1
 export rvm_prefix=$popo_path
+export CABLING_PATH=$popo_path/.popo/cabling.yml
 
 # Now let's load rvm inside popo
 source $rvm_prefix/rvm/scripts/rvm
