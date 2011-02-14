@@ -13,6 +13,8 @@ source $rvm_prefix/rvm/scripts/rvm
 rvm default 1>/dev/null 2>&1
 unset PALMADE_GEMS_DIR
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
+export CABLING_PATH=$popo_path/.popo/cabling.yml
+export CABLING_TARGET=$popo_target
 
 # this section is for backup
 #unset PALMADE_GEMS_DIR
