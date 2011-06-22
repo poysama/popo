@@ -35,19 +35,14 @@ fi
 unset $(env | awk -F= '/^rvm_/{print $1" "}')
 export rvm_reload_flag=1
 export rvm_prefix=$popo_path
-export rvm_path=$popo_path/rvm
 export CABLING_PATH=$popo_path/.popo/cabling.yml
 export CABLING_TARGET=$popo_target
-
-# Now let's load rvm inside popo
 source $rvm_prefix/rvm/scripts/rvm
 
 # Load default rvm
 rvm default 1>/dev/null 2>&1
 unset PALMADE_GEMS_DIR
-export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
-
-
+export rvm_path=$popo_path/rvm
 if [[ -z "$PS1" ]] ; then
 	rvm $*
 else
