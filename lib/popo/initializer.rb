@@ -1,32 +1,59 @@
 module Popo
   class Initializer
-    def self.boot(args, options)
-      root_path = Dir.pwd
-      check_requirements!
+    include Constants
 
-      options[:config] = load_config
-      options[:root_path] = root_path
-
-      Popo::Runner.run(args, options)
+    def self.boot(config, options)
+      self.new(config, options)
     end
 
-    def self.check_requirements!
-      if GIT_CMD.nil? || GIT_CMD.empty?
-        Popo::Utils.puts "Can\'t find \`git\` from your path. Perhaps you need to install it?", {:sub => true, :err => true}
+    def initialize(config, options)
+      @repos = {}
+
+      config['repos'].each do |k, v|
+        @repos[k] = v
+      end
+
+      @options = options
+      @rubies = config['rvm']['rubies']
+      @default_ruby = config['rvm']['default_ruby']
+
+      @default_target = @options[:target] || 'development'
+      @deploy_path = File.absolute_path(@options[:path])
+      @user = @options[:user] || ENV['USER']
+    end
+
+    def print_variables
+      instance_variables.each do |i|
+        say instance_variable_get(i)
       end
     end
 
-    def self.load_config
-      if File.exist?("#{ENV['HOME']}/.#{DEFAULT_CONFIG_FILE}")
-        config_file_path = "#{ENV['HOME']}/.#{DEFAULT_CONFIG_FILE}"
-      else
-        config_file_path = "/etc/#{DEFAULT_CONFIG_FILE}"
+    def setup
+      print_variables if @options[:verbose]
+
+      @repos.each do |k, v|
+        basename = File.basename(v['git'])
+
+        if basename == POPO_WORK_PATH.delete('.')
+          clone_path = File.join(@deploy_path, POPO_WORK_PATH)
+        else
+          clone_path = File.join(@deploy_path, basename)
+        end
+
+        GitUtils.git_clone(v['git'], clone_path, v['branch'])
       end
 
-      if !config_file_path.empty?
-        config_hash = YAML.load_file(config_file_path)
-      else
-        Popo::Utils.puts "Config file not found in #{config_file_path}", {:sub => true, :err => true}
+      write_config
+    end
+
+    def write_config
+      popo = {}
+      popo['target'] = @default_target
+      popo['path'] = @deploy_path
+      yml_path = File.join(@deploy_path, POPO_WORK_PATH, POPO_YML_FILE)
+
+      File.open(yml_path, "w") do |f|
+        YAML.dump(popo, f)
       end
     end
   end

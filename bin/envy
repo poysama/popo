@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require 'yaml'
+
+ROOT_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+BASH_PATH = `which bash`.strip
+ENV_PATH = `which env`.strip
+POPO_PATH = ENV['popo_path'] if ENV.include?('popo_path')
+POPO_TARGET = ENV['popo_target'] if ENV.include?('popo_target')
+POPO_WORK_PATH = '.manifest'
+ENVYRC = File.join(POPO_PATH, POPO_WORK_PATH, 'script/envyrc')
+
+cmd = ARGV.join(' ')
+
+finale = "#{ENV_PATH} popo_path=#{POPO_PATH} popo_target=#{POPO_TARGET} #{BASH_PATH} -c 'source #{ENVYRC}; cd #{POPO_PATH}; #{cmd}'"
+system(finale)
+
