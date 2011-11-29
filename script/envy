@@ -21,3 +21,4 @@ cmd = ARGV.join(' ')
 
 finale = "#{ENV_PATH} popo_path=#{popo_path} popo_target=#{popo_target} #{BASH_PATH} -c 'source #{envyrc}; cd #{popo_path}; #{cmd}'"
 system(finale)
+exit $?.exitstatus
