@@ -27,6 +27,7 @@ module Popo
       end
 
       git_stash(repo)
+      git_checkout(repo, branch)
       git_reset(repo, branch)
     end
 
@@ -42,6 +43,14 @@ module Popo
       Utils.say_with_time "Doing a hard reset for #{repo}" do
         Dir.chdir(repo) do
           `#{GIT_CMD} reset --hard origin/#{branch}`
+        end
+      end
+    end
+
+    def self.git_checkout(repo, branch)
+      Utils.say_with_time "Switching to #{branch} branch" do
+        Dir.chdir(repo) do
+          `#{GIT_CMD} checkout #{branch}`
         end
       end
     end
