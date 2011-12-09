@@ -14,12 +14,8 @@ module Popo
       end
 
       @options = options
-      @rubies = config['rvm']['rubies']
-      @default_ruby = config['rvm']['default_ruby']
-
       @default_target = @options[:target] || 'development'
       @deploy_path = File.absolute_path(@options[:path])
-      @user = @options[:user] || ENV['USER']
     end
 
     def print_variables

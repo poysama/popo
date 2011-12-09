@@ -23,16 +23,23 @@ module Popo
           cmd = "#{@rvm_bin} install #{r} --force"
         end
 
-        system(cmd)
+#        system(cmd)
       end
 
       default_cmd = "#{@rvm_bin} --default #{@default_ruby}"
 
-      system(default_cmd)
-      system("#{@rvm_bin} reload")
+      Utils.say_with_time "Setting #{@default_ruby} as default ruby..." do
+        system(default_cmd)
+      end
+
+      Utils.say_with_time "Reloading rvm..." do
+        system("#{@rvm_bin} reload")
+      end
 
       @default_gems.each do |g|
-        `gem install #{g} --source #{@gem_source}`
+        Utils.say_with_time "Installing gem #{g}" do
+          system("gem install #{g} --source #{@gem_source}")
+        end
       end
     end
   end
