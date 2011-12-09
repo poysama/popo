@@ -23,7 +23,7 @@ module Popo
           cmd = "#{@rvm_bin} install #{r} --force"
         end
 
-#        system(cmd)
+        system(cmd)
       end
 
       default_cmd = "#{@rvm_bin} --default #{@default_ruby}"
