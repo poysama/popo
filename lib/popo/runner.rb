@@ -53,7 +53,7 @@ module Popo
       else
         @cabler_options = { :path  => File.join(@popo_path, POPO_WORK_PATH),
                          :target   => ENV['CABLING_TARGET'],
-                         :location => @options[:location],
+                         :location => ENV['CABLING_LOCATION'],
                          :verbose  => @options[:verbose] }
 
         run(args)
@@ -64,7 +64,11 @@ module Popo
       case args.shift
       when 'init'
         if !@options[:path].nil?
-          Initializer.boot(get_config!, @options).setup
+          if File.exist?(File.join(@popo_path, @options[:path]))
+            Initializer.boot(get_config!, @options).setup
+          else
+            raise "Path already exists!"
+          end
         else
           raise "Supply a path with the -p option!"
         end
@@ -111,10 +115,11 @@ module Popo
       poporc_path = File.join(Dir.pwd, POPO_WORK_PATH, POPORC)
       target = POPO_CONFIG['target']
       path = POPO_CONFIG['path']
+      location = POPO_CONFIG['location']
 
-      bashcmd = "%s popo_target=%s popo_path=%s %s \
-                 --rcfile %s" \
-                  % [ENV_CMD, target, path, BASH_CMD, poporc_path]
+      bashcmd = "%s popo_target=%s popo_path=%s \
+                popo_location=%s %s --rcfile %s" \
+                % [ENV_CMD, target, path, location, BASH_CMD, poporc_path]
 
       exec(bashcmd)
     end

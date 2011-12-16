@@ -16,6 +16,7 @@ module Popo
       @options = options
       @default_target = @options[:target] || 'development'
       @deploy_path = File.absolute_path(@options[:path])
+      @location = @options[:location] || nil
     end
 
     def print_variables
@@ -30,7 +31,7 @@ module Popo
       @repos.each do |k, v|
         basename = File.basename(v['git'])
 
-        if basename == POPO_WORK_PATH.delete('.')
+        if k == POPO_WORK_PATH.delete('.')
           clone_path = File.join(@deploy_path, POPO_WORK_PATH)
         else
           clone_path = File.join(@deploy_path, basename)
@@ -46,6 +47,8 @@ module Popo
       popo = {}
       popo['target'] = @default_target
       popo['path'] = @deploy_path
+      popo['location'] = @location if !@location.nil?
+
       yml_path = File.join(@deploy_path, POPO_WORK_PATH, POPO_YML_FILE)
 
       File.open(yml_path, "w") do |f|

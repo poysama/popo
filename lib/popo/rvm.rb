@@ -13,6 +13,8 @@ module Popo
     end
 
     def setup
+      Utils.say "Rubies to be installed #{@rubies}...\n\n"
+
       @rubies.each do |r|
         patch = File.join(@app_root, 'rvm', "#{r}.patch")
 
