@@ -12,6 +12,8 @@ Gem::Specification.new do |s|
   s.description = %q{Ruby and rails repo tool}
 
   s.rubyforge_project = "popo"
+  s.add_dependency "sequel"
+  s.add_dependency "sqlite3"
   s.add_dependency "cableguy"
 
   s.files         = `git ls-files`.split("\n")
