@@ -11,7 +11,7 @@ module Popo
     end
 
     def initialize(args)
-      @popo_path = ENV['popo_path'] || ''
+      @popo_path = ENV['popo_path'] || Dir.pwd
       @options = {}
       @cabler_options = {}
       @options[:verbose] = false
@@ -64,7 +64,7 @@ module Popo
       case args.shift
       when 'init'
         if !@options[:path].nil?
-          if File.exist?(File.join(@popo_path, @options[:path]))
+          if !File.exist?(File.join(@popo_path, @options[:path]))
             Initializer.boot(get_config!, @options).setup
           else
             raise "Path already exists!"

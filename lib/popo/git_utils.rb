@@ -2,7 +2,8 @@ module Popo
   module GitUtils
     include Constants
 
-    def self.git_clone(repo, clone_path = nil, branch)
+    def self.git_clone(repo, clone_path, branch)
+      clone_path ||= nil
       branch = 'master' if branch.nil?
 
       if clone_path.nil?
