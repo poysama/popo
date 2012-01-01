@@ -25,24 +25,35 @@ module Popo
           cmd = "#{@rvm_bin} install #{r} --force"
         end
 
-        system(cmd)
+        #system(cmd)
       end
-
-      default_cmd = "#{@rvm_bin} --default #{@default_ruby}"
 
       Utils.say_with_time "Setting #{@default_ruby} as default ruby..." do
-        system(default_cmd)
+       `#{@rvm_bin} --default #{@default_ruby}`
       end
 
-      Utils.say_with_time "Reloading rvm..." do
-        system("#{@rvm_bin} reload")
-      end
+      Utils.say(POST_INSTALL_NOTE)
 
-      @default_gems.each do |g|
-        Utils.say_with_time "Installing gem #{g}" do
-          system("gem install #{g} --source #{@gem_source}")
-        end
-      end
+#      Utils.say_with_time "Reloading rvm..." do
+#        `#{@rvm_bin} reload`
+#      end
+
+#      @default_gems.each do |g|
+#        Utils.say_with_time "Installing gem #{g}" do
+#          `gem install #{g} --source #{@gem_source}`
+#        end
+#      end
     end
   end
+
+POST_INSTALL_NOTE = <<NOTE
+You're almost done!\n\n
+Do the following inside popo:\n
+1. rvm reload\n
+2. gem install cableguy popo dbget_client --source http://gems.caresharing.eu --no-ri --no-rdoc\n\n
+OPTIONAL: (If you use another ruby version). In this example, ree.\n
+1. rvm use ree-1.8.7-2011.03\n
+2. gem install cableguy popo dbget_client --source http://gems.caresharing.eu --no-ri --no-rdoc\n
+NOTE
+
 end
