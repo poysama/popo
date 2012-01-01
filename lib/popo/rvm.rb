@@ -25,7 +25,7 @@ module Popo
           cmd = "#{@rvm_bin} install #{r} --force"
         end
 
-        #system(cmd)
+        system(cmd)
       end
 
       Utils.say_with_time "Setting #{@default_ruby} as default ruby..." do
