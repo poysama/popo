@@ -2,18 +2,14 @@ module Popo
   class Initializer
     include Constants
 
-    def self.boot(config, options)
-      self.new(config, options)
+    def self.boot(config, options, db)
+      self.new(config, options, db)
     end
 
-    def initialize(config, options)
-      @repos = {}
-
-      config['repos'].each do |k, v|
-        @repos[k] = v
-      end
-
+    def initialize(config, options, db)
       @options = options
+      @db = db
+      @manifest = config['manifests'][@options[:manifest]]
       @default_target = @options[:target] || 'development'
       @deploy_path = File.absolute_path(@options[:path])
       @location = @options[:location] || nil
@@ -28,19 +24,22 @@ module Popo
     def setup
       print_variables if @options[:verbose]
 
-      @repos.each do |k, v|
-        basename = File.basename(v['git'])
-
-        if k == POPO_WORK_PATH.delete('.')
-          clone_path = File.join(@deploy_path, POPO_WORK_PATH)
-        else
-          clone_path = File.join(@deploy_path, basename)
-        end
-
-        GitUtils.git_clone(v['git'], clone_path, v['branch'])
-      end
+      clone_path = File.join(@deploy_path, POPO_WORK_PATH)
+      GitUtils.git_clone(@manifest['git'], clone_path, @manifest['branch'])
 
       write_config
+
+      @db.boot_database
+      @db.migrate_database
+      repos = @db.get_children("repos")
+
+      repos.each do |r|
+        git = @db.get("repos.#{r}.git")
+        branch = @db.get("repos.#{r}.branch")
+        clone_path = File.join(@deploy_path, r)
+        GitUtils.git_clone(git, clone_path, branch)
+      end
+
     end
 
     def write_config

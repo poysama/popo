@@ -19,5 +19,9 @@ module Popo
     def get_children(key, group = 'manifest')
       @cabler.db.get_children(key, group)
     end
+
+    def has_key?(key, group = 'manifest')
+      @cabler.db.has_key?(key, group)
+    end
   end
 end

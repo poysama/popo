@@ -8,12 +8,15 @@ module Popo
 
       @rubies = @db.get("rvm.rubies").split(",")
       @default_ruby = @db.get("rvm.ruby.default")
-      @default_gems = @db.get("rvm.gems.default").split(",")
-      @gem_source = @db.get("rvm.gems.source")
+      @default_gems = @db.get_children("rvm.gems.default")
+
+      if @db.has_key?("rvm.gems.source")
+        @default_gem_source = @db.get("rvm.gems.source")
+      end
     end
 
     def setup
-      Utils.say "Rubies to be installed #{@rubies}...\n\n"
+      Utils.say "Rubies to be installed #{@rubies}...\n"
 
       @rubies.each do |r|
         patch = File.join(@app_root, 'rvm', "#{r}.patch")
@@ -26,6 +29,7 @@ module Popo
         end
 
         system(cmd)
+        install_default_gems(r)
       end
 
       Utils.say_with_time "Setting #{@default_ruby} as default ruby..." do
@@ -33,27 +37,34 @@ module Popo
       end
 
       Utils.say(POST_INSTALL_NOTE)
+    end
 
-#      Utils.say_with_time "Reloading rvm..." do
-#        `#{@rvm_bin} reload`
-#      end
+    def install_default_gems(ruby_version)
+      gem_source = ''
+      gem_bin = File.join(@app_root, 'rvm', 'bin', "gem-#{ruby_version}")
 
-#      @default_gems.each do |g|
-#        Utils.say_with_time "Installing gem #{g}" do
-#          `gem install #{g} --source #{@gem_source}`
-#        end
-#      end
+      @default_gems.each do |g|
+        if @db.has_key?("rvm.gems.default.#{g}.source")
+          gem_source = @db.get("rvm.gems.default.#{g}.source")
+        end
+
+        if !gem_source.empty?
+         gem_cmd = "#{gem_bin} install #{g} --source #{gem_source} --no-ri --no-rdoc"
+        elsif !@default_gem_source.empty?
+         gem_cmd = "#{gem_bin} install #{g} --source #{@default_gem_source} --no-ri --no-rdoc"
+        else
+         gem_cmd = "#{gem_bin} install #{g} --no-ri --no-rdoc"
+        end
+
+        system(gem_cmd)
+      end
     end
   end
 
 POST_INSTALL_NOTE = <<NOTE
-You're almost done!\n\n
+You're almost done!\n
 Do the following inside popo:\n
 1. rvm reload\n
-2. gem install cableguy popo dbget_client --source http://gems.caresharing.eu --no-ri --no-rdoc\n\n
-OPTIONAL: (If you use another ruby version). In this example, ree.\n
-1. rvm use ree-1.8.7-2011.03\n
-2. gem install cableguy popo dbget_client --source http://gems.caresharing.eu --no-ri --no-rdoc\n
 NOTE
 
 end

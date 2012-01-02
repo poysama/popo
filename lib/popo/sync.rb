@@ -27,7 +27,7 @@ module Popo
 
       if @repos.empty?
         if @cwd.eql? @app_root
-          popo_folders = @db.get("popo_folders").split(',')
+          popo_folders = @db.get("sync.directories").split(',')
           popo_folders.each { |p| gather_many(p) }
         else
           repo = File.basename(@cwd)

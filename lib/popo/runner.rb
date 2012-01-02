@@ -12,8 +12,10 @@ module Popo
 
     def initialize(args)
       @popo_path = ENV['popo_path'] || Dir.pwd
+      Object.const_set("POPO_PATH", @popo_path)
       @options = {}
       @cabler_options = {}
+      @options[:target] = 'development'
       @options[:verbose] = false
 
       optparse = OptionParser.new do |opts|
@@ -30,6 +32,10 @@ module Popo
 
         opts.on('-u', '--user USER', 'Username') do |user|
           @options[:user] = user
+        end
+
+        opts.on('-m', '--manifest MANIFEST', 'Manifest') do |manifest|
+          @options[:manifest] = manifest
         end
 
         opts.on('-l', '--location LOCATION', 'Location') do |location|
@@ -51,26 +57,41 @@ module Popo
       if args.length == 0
         Utils.say optparse.help
       else
-        @cabler_options = { :path  => File.join(@popo_path, POPO_WORK_PATH),
-                         :target   => ENV['CABLING_TARGET'],
-                         :location => ENV['CABLING_LOCATION'],
-                         :verbose  => @options[:verbose] }
+        Object.const_set("POPO_TARGET", @options[:target])
+        Object.const_set("POPO_LOCATION", @options[:location])
+        Object.const_set("POPO_USER", @options[:user])
 
-        run(args)
+        @cabler_options = { :path  => File.join(@popo_path, POPO_WORK_PATH),
+                         :target   => ENV['CABLING_TARGET'] || POPO_TARGET || 'development',
+                         :location => ENV['CABLING_LOCATION'] || POPO_LOCATION,
+                         :verbose  => @options[:verbose] }
+        self.run(args)
       end
     end
 
     def run(args)
       case args.shift
       when 'init'
+        config = get_config!
+
+        if !@options[:manifest].nil?
+          if config['manifests'][@options[:manifest]].nil?
+            raise "manifest #{@options[:manifest]} does not exist in #{DEFAULT_CONFIG_FILE}!"
+          end
+        else
+          raise "manifest (-m) option needed!"
+        end
+
         if !@options[:path].nil?
           if !File.exist?(File.join(@popo_path, @options[:path]))
-            Initializer.boot(get_config!, @options).setup
+            @cabler_options[:path] = File.join(@popo_path, @options[:path], POPO_WORK_PATH)
+            db = Database.new(@popo_path, @cabler_options)
+            Initializer.boot(config, @options, db).setup
           else
             raise "Path already exists!"
           end
         else
-          raise "Supply a path with the -p option!"
+          raise "path (-p) option needed!"
         end
       when 'sync'
         if Utils.in_popo?(@popo_path)
@@ -81,16 +102,9 @@ module Popo
         end
       when 'rvminstall'
         if Utils.in_popo?(@popo_path)
-          print "Install all rubies?(y/N): "
-
-          ok = $stdin.gets.chomp!
-          if ok == 'y'
-            db = Database.new(@popo_path, @cabler_options)
-            db.boot_database
-            RVM.new(@popo_path, args, db).setup
-          else
-            Utils.say "y/N only!"
-          end
+          db = Database.new(@popo_path, @cabler_options)
+          db.boot_database
+          RVM.new(@popo_path, args, db).setup
         end
       when 'migrate'
         if Utils.in_popo?(@popo_path)
