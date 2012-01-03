@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-VERSION = "0.1.1"
+require 'popo/version'
 
 Gem::Specification.new do |s|
   s.name        = "popo"
-  s.version     = VERSION
+  s.version     = Popo::VERSION
   s.authors     = ["Jan Mendoza"]
   s.email       = ["poymode@gmail.com"]
   s.homepage    = ""

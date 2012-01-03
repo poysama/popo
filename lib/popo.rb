@@ -3,6 +3,7 @@ require 'palmade/cableguy'
 require 'optparse'
 require 'yaml'
 require 'fileutils'
+require File.join(File.dirname(__FILE__), 'popo/version')
 
 module Popo
   POPO_LIB_ROOT = File.join(File.dirname(__FILE__), 'popo')

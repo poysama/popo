@@ -13,9 +13,16 @@ module Popo
     def initialize(args)
       @popo_path = ENV['popo_path'] || Dir.pwd
       Object.const_set("POPO_PATH", @popo_path)
+
       @options = {}
       @cabler_options = {}
-      @options[:target] = 'development'
+
+      if POPO_CONFIG.empty?
+        @options[:target] = 'development'
+      else
+        @options[:target] = POPO_CONFIG['target']
+      end
+
       @options[:verbose] = false
 
       optparse = OptionParser.new do |opts|
@@ -46,6 +53,11 @@ module Popo
           @options[:verbose] = true
         end
 
+        opts.on('-V', '--version', 'Version') do
+          puts Popo::VERSION
+          exit
+        end
+
         opts.on('-h', '--help', 'Display this screen') do
           puts opts
           exit
@@ -62,9 +74,10 @@ module Popo
         Object.const_set("POPO_USER", @options[:user])
 
         @cabler_options = { :path  => File.join(@popo_path, POPO_WORK_PATH),
-                         :target   => ENV['CABLING_TARGET'] || POPO_TARGET || 'development',
-                         :location => ENV['CABLING_LOCATION'] || POPO_LOCATION,
-                         :verbose  => @options[:verbose] }
+                            :target   => ENV['CABLING_TARGET'] || @options[:target] || 'development',
+                            :location => ENV['CABLING_LOCATION'] || @options[:location],
+                            :verbose  => @options[:verbose]
+                          }
         self.run(args)
       end
     end

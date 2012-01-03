@@ -54,6 +54,7 @@ module Popo
       if !File.exists?(@info[:path])
         GitUtils.git_clone(@info[:host], @info[:path], @info[:branch])
       else
+        GitUtils.git_stash(@info[:path]) if POPO_CONFIG['target'] == 'development'
         GitUtils.git_update(@info[:path], @info[:branch])
       end
     end

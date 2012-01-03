@@ -27,7 +27,6 @@ module Popo
         end
       end
 
-      git_stash(repo)
       git_checkout(repo, branch)
       git_reset(repo, branch)
     end
