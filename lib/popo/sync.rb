@@ -1,5 +1,7 @@
 module Popo
   class Sync
+    include Constants
+
     def initialize(app_root, args, db)
       @db = db
       @current_dir = File.basename(Dir.pwd)
