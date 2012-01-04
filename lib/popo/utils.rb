@@ -24,7 +24,7 @@ module Popo
       true
     end
 
-    def self.require_relative_work_popo(root_path)
+    def self.has_popo_config?(root_path)
       popo_work_path = File.expand_path(File.join(root_path, POPO_WORK_PATH))
 
       popo_yml = File.expand_path(File.join(popo_work_path, POPO_YML_FILE))
@@ -37,8 +37,11 @@ module Popo
         else
           raise "#{POPO_WORK_PATH}/#{POPO_YML_FILE} seems to be wrong."
         end
+
+        true
       else
-        raise "#{POPO_YML_FILE} not found."
+        false
+#        raise "#{POPO_YML_FILE} not found."
       end
     end
   end

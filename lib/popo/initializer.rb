@@ -27,8 +27,6 @@ module Popo
       clone_path = File.join(@deploy_path, POPO_WORK_PATH)
       GitUtils.git_clone(@manifest['git'], clone_path, @manifest['branch'])
 
-      write_config
-
       @db.boot_database
       @db.migrate_database
       repos = @db.get_children("repos")
@@ -40,6 +38,7 @@ module Popo
         GitUtils.git_clone(git, clone_path, branch)
       end
 
+      write_config
     end
 
     def write_config

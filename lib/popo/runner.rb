@@ -16,14 +16,12 @@ module Popo
 
       @options = {}
       @cabler_options = {}
+      @options[:verbose] = false
+      @options[:target] = 'development'
 
-      if POPO_CONFIG.empty?
-        @options[:target] = 'development'
-      else
+      if Utils.has_popo_config?(@popo_path)
         @options[:target] = POPO_CONFIG['target']
       end
-
-      @options[:verbose] = false
 
       optparse = OptionParser.new do |opts|
         opts.banner = "Popo tool."
@@ -137,18 +135,21 @@ module Popo
     end
 
     def bash!
-      Utils.require_relative_work_popo(Dir.pwd)
+      if Utils.has_popo_config?(Dir.pwd)
 
-      poporc_path = File.join(Dir.pwd, POPO_WORK_PATH, POPORC)
-      target = POPO_CONFIG['target']
-      path = POPO_CONFIG['path']
-      location = POPO_CONFIG['location']
+        poporc_path = File.join(Dir.pwd, POPO_WORK_PATH, POPORC)
+        target = POPO_CONFIG['target']
+        path = POPO_CONFIG['path']
+        location = POPO_CONFIG['location']
 
-      bashcmd = "%s popo_target=%s popo_path=%s \
-                popo_location=%s %s --rcfile %s" \
-                % [ENV_CMD, target, path, location, BASH_CMD, poporc_path]
+        bashcmd = "%s popo_target=%s popo_path=%s \
+                  popo_location=%s %s --rcfile %s" \
+                  % [ENV_CMD, target, path, location, BASH_CMD, poporc_path]
 
-      exec(bashcmd)
+        exec(bashcmd)
+      else
+        raise "#{POPO_YML_FILE} not found or it may be wrong!"
+      end
     end
 
     def get_config!
