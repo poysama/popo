@@ -7,7 +7,7 @@ ENV_PATH = `which env`.strip
 POPO_PATH = ENV['popo_path'] if ENV.include?('popo_path')
 POPO_TARGET = ENV['popo_target'] if ENV.include?('popo_target')
 POPO_WORK_PATH = '.manifest'
-ENVYRC = File.join(POPO_PATH, POPO_WORK_PATH, 'script/envyrc')
+ENVYRC = File.expand_path(File.join(File.dirname(__FILE__), '../script/envyrc'))
 
 cmd = ARGV.join(' ')
 
