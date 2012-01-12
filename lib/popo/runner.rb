@@ -4,6 +4,7 @@ module Popo
 
     def self.boot(args)
       Popo::Constants.const_set("BASH_CMD", `which bash`.strip)
+      Popo::Constants.const_set("ZSH_CMD", `which zsh`.strip)
       Popo::Constants.const_set("ENV_CMD", `which env`.strip)
       Popo::Constants.const_set("GIT_CMD", `which git`.strip)
 
@@ -129,6 +130,8 @@ module Popo
         puts "Pushing!"
       when 'bash'
         bash!
+      when 'zsh'
+        zsh!
       else
         puts "I don't know what to do."
       end
@@ -147,6 +150,25 @@ module Popo
                   % [ENV_CMD, target, path, location, BASH_CMD, poporc_path]
 
         exec(bashcmd)
+      else
+        raise "#{POPO_YML_FILE} not found or it may be wrong!"
+      end
+    end
+
+    def zsh!
+      if Utils.has_popo_config?(Dir.pwd)
+
+        zdotdir  = File.join(Dir.pwd, POPO_WORK_PATH, 'script')
+        target   = POPO_CONFIG['target']
+        path     = POPO_CONFIG['path']
+        location = POPO_CONFIG['location']
+
+        zshcmd = "%s popo_target=%s popo_path=%s \
+                popo_location=%s ZDOTDIR=%s\
+                %s" \
+                % [ENV_CMD, target, path, location, zdotdir, ZSH_CMD]
+
+                exec(zshcmd)
       else
         raise "#{POPO_YML_FILE} not found or it may be wrong!"
       end
