@@ -54,6 +54,32 @@ module Popo
         end
       end
     end
+
+    def self.branch_diff(cwd, branches = ['master', 'development'])
+      if is_git?(cwd)
+        diff_msg = `#{GIT_CMD} log --abbrev-commit --format=short \
+                   origin/#{branches[0]}..origin/#{branches[1]}`
+
+        parsed = diff_msg.scan(/(commit [0-9a-f]+)\n+(.*?)\n+(.*?)(?:\n|$)/)
+
+        puts "Commits in #{branches[0]} not found in #{branches[1]}"
+
+        parsed.each do |p|
+          commit_id = p[0].gsub(/commit/,'').strip
+          author = p[1].scan(/Author: (.*) <.*>/)
+          commit_msg = p[2].strip
+
+          Utils.say "#{commit_id} \<#{author}\> #{commit_msg}"
+        end
+      else
+        raise "#{cwd} is not a git repo!"
+      end
+
+    end
+
+    def self.is_git?(cwd)
+      File.exists?(File.join(cwd, '.git'))
+    end
   end
 end
 

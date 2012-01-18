@@ -132,6 +132,8 @@ module Popo
         bash!
       when 'zsh'
         zsh!
+      when 'diff'
+        GitUtils.branch_diff(Dir.pwd)
       else
         puts "I don't know what to do."
       end
