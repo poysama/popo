@@ -13,4 +13,4 @@ unset PALMADE_GEMS_DIR
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
 export CABLING_PATH=$popo_path/.popo/cabling.yml
 export CABLING_TARGET=$popo_target
-
+export DBGET_PATH=$popo_path/.manifest
