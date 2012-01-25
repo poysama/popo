@@ -3,10 +3,10 @@ module Popo
     include Constants
 
     def self.boot(args)
-      Popo::Constants.const_set("BASH_CMD", `which bash`.strip)
-      Popo::Constants.const_set("ZSH_CMD", `which zsh`.strip)
-      Popo::Constants.const_set("ENV_CMD", `which env`.strip)
-      Popo::Constants.const_set("GIT_CMD", `which git`.strip)
+      Popo::Constants.const_set("BASH_CMD", `which bash 2>/dev/null`.strip)
+      Popo::Constants.const_set("ZSH_CMD", `which zsh 2>/dev/null`.strip)
+      Popo::Constants.const_set("ENV_CMD", `which env 2>/dev/null`.strip)
+      Popo::Constants.const_set("GIT_CMD", `which git 2>/dev/null`.strip)
 
       self.new(args)
     end
