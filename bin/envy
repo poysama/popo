@@ -1,16 +1,69 @@
 #!/usr/bin/env ruby
+require 'optparse'
 require 'yaml'
 
-ROOT_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-BASH_PATH = `which bash`.strip
-ENV_PATH = `which env`.strip
-POPO_PATH = ENV['popo_path'] if ENV.include?('popo_path')
-POPO_TARGET = ENV['popo_target'] if ENV.include?('popo_target')
-POPO_WORK_PATH = '.manifest'
-ENVYRC = File.expand_path(File.join(File.dirname(__FILE__), '../script/envyrc'))
+module Popo
+  class Envy
+    POPO_CONFIG_FILE = 'popo.yml'
+    ENVYRC_FILE = 'envyrc'
+    BASH_PATH = `which bash`.strip
+    ENVY_CMD = `which env`.strip
+    ENVYRC = File.expand_path("../../script/#{ENVYRC_FILE}", __FILE__)
 
-cmd = ARGV.join(' ')
+    def self.boot(args)
+      options = {}
 
-finale = "#{ENV_PATH} popo_path=#{POPO_PATH} popo_target=#{POPO_TARGET} #{BASH_PATH} -c 'source #{ENVYRC}; cd #{POPO_PATH}; #{cmd}'"
-system(finale)
+      optparse = OptionParser.new do |opts|
+        opts.on('-C', '--chdir DIRECTORY', 'Changed to a given directory') do |d|
+          options[:directory] = d
+        end
+      end
 
+      optparse.parse!
+
+      self.new(args, options)
+    end
+
+    def initialize(args, options)
+      @root_path = args.shift
+      @options = options
+      @commands = []
+
+      # set commands
+      args.each do |a|
+        @commands << a
+      end
+
+      config_file = File.join(@root_path, POPO_CONFIG_FILE)
+
+      if File.exists?(config_file)
+        cfg = YAML.load_file(config_file)
+        @popo_path = cfg['path']
+        @popo_target = cfg['target']
+      else
+        raise "#{config_file} doesn't exist!"
+      end
+
+      if !@options[:directory].nil?
+        @directory = File.join(@popo_path, @options[:directory])
+      else
+        @directory = ''
+      end
+    end
+
+    def run!
+      cmd = "#{ENVY_CMD} popo_path=#{@popo_path} \
+            popo_target=#{@popo_target} #{BASH_PATH} \
+            -c 'source #{ENVYRC}; #{@commands.join(' ')}'"
+
+      if @directory.empty?
+        `#{cmd}`
+      else
+        Dir.chdir(@directory) { `#{cmd}` }
+      end
+    end
+  end
+end
+
+Popo::Envy.boot(ARGV).run!
+exit $?.exitstatus
