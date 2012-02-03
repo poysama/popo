@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 
 # Let's unload system installed rvm and move path prefix to popo
-unset $(env | awk -F= '/^rvm_/{print $1" "}')
-export rvm_reload_flag=1
+export PATH=$(echo $PATH | tr ':' '\n' | grep -v /\.rvm/ | paste -sd:)
 export rvm_prefix=$popo_path
 export rvm_path=$popo_path/rvm
+
 # Now let's load rvm inside popo
 source $rvm_prefix/rvm/scripts/rvm
-# Load default rvm
-rvm default 1>/dev/null 2>&1
+
 unset PALMADE_GEMS_DIR
 export PATH="$popo_path/rvm/bin:$popo_path/tools:$PATH"
-export CABLING_PATH=$popo_path/.popo/cabling.yml
+export CABLING_PATH=$popo_path/.manifest/cabling
 export CABLING_TARGET=$popo_target
 export DBGET_PATH=$popo_path/.manifest

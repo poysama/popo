@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Popo::VERSION
   s.authors     = ["Jan Mendoza"]
   s.email       = ["poymode@gmail.com"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/poymode/popo"
   s.summary     = %q{Popo ruby and rails repo tool}
   s.description = %q{Ruby and rails repo tool}
 

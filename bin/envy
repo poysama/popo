@@ -7,14 +7,14 @@ module Popo
     POPO_CONFIG_FILE = 'popo.yml'
     ENVYRC_FILE = 'envyrc'
     BASH_PATH = `which bash`.strip
-    ENVY_CMD = `which env`.strip
+    ENV_CMD = `which env`.strip
     ENVYRC = File.expand_path("../../script/#{ENVYRC_FILE}", __FILE__)
 
     def self.boot(args)
       options = {}
 
       optparse = OptionParser.new do |opts|
-        opts.on('-C', '--chdir DIRECTORY', 'Changed to a given directory') do |d|
+        opts.on('-d', '--chdir DIRECTORY', 'Changed to a given directory') do |d|
           options[:directory] = d
         end
       end
@@ -27,40 +27,35 @@ module Popo
     def initialize(args, options)
       @root_path = args.shift
       @options = options
-      @commands = []
-
-      # set commands
-      args.each do |a|
-        @commands << a
-      end
+      args = args.join(' ')
 
       config_file = File.join(@root_path, POPO_CONFIG_FILE)
 
       if File.exists?(config_file)
-        cfg = YAML.load_file(config_file)
-        @popo_path = cfg['path']
-        @popo_target = cfg['target']
+        config = YAML.load_file(config_file)
+        @popo_path = config['path']
+        @popo_target = config['target']
       else
         raise "#{config_file} doesn't exist!"
       end
 
       if !@options[:directory].nil?
         @directory = File.join(@popo_path, @options[:directory])
+        @cmd = ["cd #{@directory};", args].join(' ')
       else
-        @directory = ''
+        @cmd = args
       end
+
     end
 
     def run!
-      cmd = "#{ENVY_CMD} popo_path=#{@popo_path} \
-            popo_target=#{@popo_target} #{BASH_PATH} \
-            -c 'source #{ENVYRC}; #{@commands.join(' ')}'"
+      cmd = "#{ENV_CMD} "\
+            "popo_path=#{@popo_path} "\
+            "popo_target=#{@popo_target} "\
+            "#{BASH_PATH} -c "\
+            "'source #{ENVYRC}; #{@cmd}'"
 
-      if @directory.empty?
-        `#{cmd}`
-      else
-        Dir.chdir(@directory) { `#{cmd}` }
-      end
+      system(cmd)
     end
   end
 end

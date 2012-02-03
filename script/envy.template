@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+ENVY_PATH = `which envy`.strip
+ROOT_PATH = File.expand_path('../..', __FILE__)
+
+# add additional escape for shell variables
+# so that it will not be parsed before passing to envy
+
+args = ARGV.join(' ')
+args.gsub!(/\$\w+/) { |match| "\\#{match}" }
+
+cmd = "#{ENVY_PATH} #{ROOT_PATH} #{args}"
+system(cmd)
+
