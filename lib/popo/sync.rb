@@ -2,69 +2,91 @@ module Popo
   class Sync
     include Constants
 
-    def initialize(app_root, args, db)
+    def initialize(popo_path, args, db)
       @db = db
-      @current_dir = File.basename(Dir.pwd)
-      @app_root = app_root
+      @sync_list = @db.get(POPO_DIR_KEY).split(',')
+      @popo_path = popo_path
       @cwd = Dir.pwd
-      @repos = args
+      @projects = args
       @info = {}
     end
 
-    def gather
-      @repos.each do |repo|
-        if repo =~ /\//
-          r = repo.split('/')
-          @info[:parent], @info[:name] = r
-          @info[:key] = [@info[:parent], @info[:name]].join('.')
-          @info[:path] = File.join(@app_root, @info[:parent], @info[:name])
+    def sync
+      @projects.each do |project|
+        if project =~ /\//
+          @info['key'] = convert_to_key(project)
+          @info['path'] = File.join(@popo_path, project)
 
-          get_repo_values(@info[:key])
+          get_values(@info['key'])
 
-          clone_or_update
+          get_project
         else
-          gather_many(repo)
+          sync_all(project)
         end
       end
 
-      if @repos.empty?
-        if @cwd.eql? @app_root
-          popo_folders = @db.get("sync.directories").split(',')
-          popo_folders.each { |p| gather_many(p) }
+      if @projects.empty?
+        if @cwd.eql? @popo_path
+          @sync_list.each { |p| sync_all(p) }
         else
-          repo = File.basename(@cwd)
-          gather_many(repo)
+          project = @cwd.split('/') - @popo_path.split('/')
+
+          sync_all(convert_to_key(project))
         end
       end
     end
 
-    def gather_many(repo)
-      children = @db.get_children(repo)
+    def sync_all(project)
+      if @sync_list.include? project
+        children = @db.get_children(project)
 
-      raise "No values for parent key \'#{repo}\'." if children.empty?
+        if children.empty?
+          Error.say "No values for parent key \'#{project}\'."
+        end
 
-      children.each do |c|
-        @info[:key] = [repo, c].join('.')
-        get_repo_values(@info[:key])
-        @info[:path] = File.join(@app_root, repo,  c)
+        children.each do |c|
+          @info['key'] = [project, c].join('.')
 
-        clone_or_update
-      end
-    end
+          get_values(@info['key'])
 
-    def clone_or_update
-      if !File.exists?(@info[:path])
-        GitUtils.git_clone(@info[:host], @info[:path], @info[:branch])
+          @info['path'] = File.join(@popo_path, project.gsub('.','/'), c)
+
+          get_project
+        end
       else
-        GitUtils.git_stash(@info[:path]) if POPO_CONFIG['target'] == 'development'
-        GitUtils.git_update(@info[:path], @info[:branch])
+        get_values(project)
+
+        @info['path'] = File.join(@popo_path, project.gsub('.','/'))
+
+        get_project
+      end
+    end
+
+    def get_project
+      if !File.exists?(@info['path'])
+        GitUtils.git_clone(@info[''], @info['path'], @info['branch'])
+      else
+        if POPO_CONFIG['target'] == DEFAULT_POPO_TARGET
+          GitUtils.git_stash(@info['path'])
+        end
+
+        GitUtils.git_update(@info['path'], @info['branch'])
       end
     end
 
 
-    def get_repo_values(key)
-      @info[:branch] = @db.get("#{key}.branch")
-      @info[:host] = @db.get("#{key}.repo")
+    def get_values(key)
+      POPO_KEY_VALUES.each do |v|
+        @info[v] = @db.get("#{key}.#{v}")
+      end
+    end
+
+    def convert_to_key(project)
+      if project.is_a? String
+        project.split('/').join('.')
+      else
+        project.join('.')
+      end
     end
   end
 end

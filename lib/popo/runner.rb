@@ -12,15 +12,12 @@ module Popo
     end
 
     def initialize(args)
-      @popo_path = ENV['popo_path'] || Dir.pwd
-      Object.const_set("POPO_PATH", @popo_path)
-
-      @options = {}
-      @cabler_options = {}
+      @db_opts           = {}
+      @options           = {}
+      @app_root         = ENV['popo_path'] || Dir.pwd
       @options[:verbose] = false
-      @options[:target] = 'development'
 
-      if Utils.has_popo_config?(@popo_path)
+      if Utils.has_popo_config?(@app_root)
         @options[:target] = POPO_CONFIG['target']
       end
 
@@ -65,114 +62,103 @@ module Popo
 
       optparse.parse!
 
-      if args.length == 0
+      if args.length < 1
         Utils.say optparse.help
       else
-        Object.const_set("POPO_TARGET", @options[:target])
+        # set manifest usable constants
+        Object.const_set("POPO_PATH", @app_root)
+        Object.const_set("POPO_TARGET", DEFAULT_POPO_TARGET)
         Object.const_set("POPO_LOCATION", @options[:location])
         Object.const_set("POPO_USER", @options[:user])
 
-        @cabler_options = { :path  => File.join(@popo_path, POPO_WORK_PATH),
-                            :target   => ENV['CABLING_TARGET'] || @options[:target] || 'development',
-                            :location => ENV['CABLING_LOCATION'] || @options[:location],
-                            :verbose  => @options[:verbose]
-                          }
+        @db_opts[:path]     = File.join(@app_root, POPO_WORK_PATH)
+        @db_opts[:target]   = ENV['CABLING_TARGET'] || @options[:target] || DEFAULT_POPO_TARGET
+        @db_opts[:location] = ENV['CABLING_LOCATION'] || @options[:location]
+        @db_opts[:verbose]  = @options[:verbose]
+
+        mandatory = [:path, :manifest]
+        mandatory = mandatory.select { |p| @options[p].nil? }
+
+        if args.first == 'init' and !mandatory.empty?
+          Error.say "Missing options: #{mandatory.join(', ')}"
+        end
+
         self.run(args)
       end
     end
 
     def run(args)
-      case args.shift
+      if POPO_COMMANDS.include?(args)
+        Utils.in_popo?(@app_root)
+      end
+
+      cmd = args.shift
+
+      case cmd
       when 'init'
         config = get_config!
 
-        if !@options[:manifest].nil?
-          if config['manifests'][@options[:manifest]].nil?
-            raise "manifest #{@options[:manifest]} does not exist in #{DEFAULT_CONFIG_FILE}!"
-          end
-        else
-          raise "manifest (-m) option needed!"
+        if config['manifests'][@options[:manifest]].nil?
+          Error.say "\'#{@options[:manifest]}\' does not exist in #{DEFAULT_CONFIG_FILE}!"
         end
 
-        if !@options[:path].nil?
-          if !File.exist?(File.join(@popo_path, @options[:path]))
-            @cabler_options[:path] = File.join(@popo_path, @options[:path], POPO_WORK_PATH)
-            db = Database.new(@popo_path, @cabler_options)
-            Initializer.boot(config, @options, db).setup
-          else
-            raise "Path already exists!"
-          end
+        if !File.exist?(File.join(@app_root, @options[:path]))
+          @db_opts[:path] = File.join(@app_root, @options[:path], POPO_WORK_PATH)
+          db = Database.new(@app_root, @db_opts)
+
+          Initializer.boot(config, @options, db).setup
         else
-          raise "path (-p) option needed!"
+          Error.say "Path already exists!"
         end
       when 'sync'
-        if Utils.in_popo?(@popo_path)
-          db = Database.new(@popo_path, @cabler_options)
-          db.boot_database
+        db = Database.new(@app_root, @db_opts)
+        db.boot_database
 
-          Sync.new(@popo_path, args, db).gather
-        end
-      when 'rvminstall'
-        if Utils.in_popo?(@popo_path)
-          db = Database.new(@popo_path, @cabler_options)
-          db.boot_database
-          RVM.new(@popo_path, args, db).setup
-        end
+        Sync.new(@app_root, args, db).sync
+      when 'rvm'
+        db = Database.new(@app_root, @db_opts)
+        db.boot_database
+
+        RVM.new(@app_root, args, db).setup
       when 'migrate'
-        if Utils.in_popo?(@popo_path)
-          db = Database.new(@popo_path, @cabler_options)
-          db.boot_database
-          db.migrate_database
-        end
+        db = Database.new(@app_root, @db_opts)
+        db.boot_database
+        db.migrate_database
       when 'status'
-        Utils.say `cat #{File.join(@popo_path, POPO_WORK_PATH, POPO_YML_FILE)}`
-      when 'upload'
-        puts "Pushing!"
+        Utils.say `cat #{File.join(@app_root, POPO_WORK_PATH, POPO_YML_FILE)}`
       when 'bash'
-        bash!
+        sh!(cmd)
       when 'zsh'
-        zsh!
+        sh!(cmd)
       when 'diff'
         GitUtils.branch_diff(Dir.pwd)
       else
-        puts "I don't know what to do."
+        Error.say "#{args} not a valid command!"
       end
     end
 
-    def bash!
-      if Utils.has_popo_config?(Dir.pwd)
-
-        poporc_path = File.join(Dir.pwd, POPO_WORK_PATH, POPORC)
-        target = POPO_CONFIG['target']
-        path = POPO_CONFIG['path']
-        location = POPO_CONFIG['location']
-
-        bashcmd = "%s popo_target=%s popo_path=%s \
-                  popo_location=%s %s --rcfile %s" \
-                  % [ENV_CMD, target, path, location, BASH_CMD, poporc_path]
-
-        exec(bashcmd)
-      else
-        raise "#{POPO_YML_FILE} not found or it may be wrong!"
-      end
-    end
-
-    def zsh!
-      if Utils.has_popo_config?(Dir.pwd)
-
-        zdotdir  = File.join(Dir.pwd, POPO_WORK_PATH, 'script')
-        target   = POPO_CONFIG['target']
+    def sh!(shell)
+      if Utils.has_popo_config?(@app_root)
         path     = POPO_CONFIG['path']
+        target   = POPO_CONFIG['target']
         location = POPO_CONFIG['location']
 
-        zshcmd = "%s popo_target=%s popo_path=%s \
-                popo_location=%s ZDOTDIR=%s\
-                %s" \
-                % [ENV_CMD, target, path, location, zdotdir, ZSH_CMD]
+        if shell == 'bash'
+          poporc  = File.expand_path('../../../script/poporc', __FILE__)
 
-                exec(zshcmd)
-      else
-        raise "#{POPO_YML_FILE} not found or it may be wrong!"
+          shcmd   = "%s popo_target=%s popo_path=%s \
+                    popo_location=%s %s --rcfile %s" \
+                    % [ENV_CMD, target, path, location, BASH_CMD, poporc]
+        else
+          zdotdir = File.expand_path('../../../script', __FILE__)
+
+          shcmd   = "%s popo_target=%s popo_path=%s \
+                    popo_location=%s ZDOTDIR=%s\
+                    %s" \
+                    % [ENV_CMD, target, path, location, zdotdir, ZSH_CMD]
+        end
+
+        exec(shcmd)
       end
     end
 
@@ -182,7 +168,7 @@ module Popo
       elsif File.exist?(File.join('/etc', DEFAULT_CONFIG_FILE))
         config_file_path = "/etc/#{DEFAULT_CONFIG_FILE}"
       else
-        raise "No popo_config.yml found in #{ENV['HOME']} or /etc"
+        Error.say "No popo_config.yml found in #{ENV['HOME']} or /etc"
       end
 
       config_hash = YAML.load_file(config_file_path)

@@ -72,7 +72,7 @@ module Popo
           Utils.say "#{commit_id} \<#{author}\> #{commit_msg}"
         end
       else
-        raise "#{cwd} is not a git repo!"
+        Error.say "#{cwd} is not a git repo!"
       end
 
     end

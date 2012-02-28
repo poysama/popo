@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{Popo ruby and rails repo tool}
   s.description = %q{Ruby and rails repo tool}
 
-  s.rubyforge_project = "popo"
   s.add_dependency "sequel"
   s.add_dependency "sqlite3"
   s.add_dependency "cableguy"
