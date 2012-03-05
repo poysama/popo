@@ -62,17 +62,23 @@ module Popo
 
         parsed = diff_msg.scan(/(commit [0-9a-f]+)\n+(.*?)\n+(.*?)(?:\n|$)/)
 
-        puts "Commits in #{branches[0]} not found in #{branches[1]}"
+        Utils.say "#{File.basename(cwd).capitalize}"
 
         parsed.each do |p|
           commit_id = p[0].gsub(/commit/,'').strip
           author = p[1].scan(/Author: (.*) <.*>/)
           commit_msg = p[2].strip
 
-          Utils.say "#{commit_id} \<#{author}\> #{commit_msg}"
+          Utils.say "#{commit_id} \<#{author}\> #{commit_msg}", true
         end
       else
-        Error.say "#{cwd} is not a git repo!"
+        repos = Dir.entries(cwd) - [ '.', '..' ]
+
+        repos.each do |r|
+          if File.directory?(r)
+            FileUtils.cd(r) { branch_diff(File.join(cwd, r)) }
+          end
+        end
       end
 
     end
