@@ -64,7 +64,7 @@ module Popo
 
     def get_project
       if !File.exists?(@info['path'])
-        GitUtils.git_clone(@info[''], @info['path'], @info['branch'])
+        GitUtils.git_clone(@info['repo'], @info['path'], @info['branch'])
       else
         if POPO_CONFIG['target'] == DEFAULT_POPO_TARGET
           GitUtils.git_stash(@info['path'])

@@ -65,16 +65,17 @@ module Popo
       if args.length < 1
         Utils.say optparse.help
       else
-        # set manifest usable constants
-        Object.const_set("POPO_PATH", @app_root)
-        Object.const_set("POPO_TARGET", DEFAULT_POPO_TARGET)
-        Object.const_set("POPO_LOCATION", @options[:location])
-        Object.const_set("POPO_USER", @options[:user])
-
         @db_opts[:path]     = File.join(@app_root, POPO_WORK_PATH)
         @db_opts[:target]   = ENV['CABLING_TARGET'] || @options[:target] || DEFAULT_POPO_TARGET
         @db_opts[:location] = ENV['CABLING_LOCATION'] || @options[:location]
         @db_opts[:verbose]  = @options[:verbose]
+
+        # set manifest usable constants
+        Object.const_set("POPO_PATH", @app_root)
+        Object.const_set("POPO_TARGET", @db_opts[:target])
+        Object.const_set("POPO_LOCATION", @options[:location])
+        Object.const_set("POPO_USER", @options[:user])
+
 
         mandatory = [:path, :manifest]
         mandatory = mandatory.select { |p| @options[p].nil? }
