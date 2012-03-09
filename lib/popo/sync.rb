@@ -2,7 +2,7 @@ module Popo
   class Sync
     include Constants
 
-    def initialize(popo_path, args, db)
+    def initialize(db, popo_path, args)
       @db = db
       @sync_list = @db.get(POPO_DIR_KEY).split(',')
       @popo_path = popo_path
@@ -29,9 +29,10 @@ module Popo
         if @cwd.eql? @popo_path
           @sync_list.each { |p| sync_all(p) }
         else
-          project = @cwd.split('/') - @popo_path.split('/')
+          key = @cwd.split('/')
+          key.shift(@popo_path.split('/').count)
 
-          sync_all(convert_to_key(project))
+          sync_all(convert_to_key(key))
         end
       end
     end
@@ -73,7 +74,6 @@ module Popo
         GitUtils.git_update(@info['path'], @info['branch'])
       end
     end
-
 
     def get_values(key)
       POPO_KEY_VALUES.each do |v|

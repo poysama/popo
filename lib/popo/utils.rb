@@ -21,6 +21,7 @@ module Popo
       if !ENV.include?('popo_path')
         Error.say "You must be inside popo!"
       end
+
       true
     end
 

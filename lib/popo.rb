@@ -12,7 +12,7 @@ module Popo
   autoload :Database, File.join(POPO_LIB_ROOT, 'database')
   autoload :Error, File.join(POPO_LIB_ROOT, 'error')
   autoload :GitUtils, File.join(POPO_LIB_ROOT, 'git_utils')
-  autoload :Initializer, File.join(POPO_LIB_ROOT, 'initializer')
+  autoload :Init, File.join(POPO_LIB_ROOT, 'init')
   autoload :Runner, File.join(POPO_LIB_ROOT, 'runner')
   autoload :RVM, File.join(POPO_LIB_ROOT, 'rvm')
   autoload :Sync, File.join(POPO_LIB_ROOT, 'sync')

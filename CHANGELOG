@@ -1,0 +1,27 @@
+-- 0.1.10
+
+features
+  * popo bash is now popo shell. bash still works though. just changed
+    underlying code to be more generic
+
+  * popo will now check for $SHELL instead of which
+
+  * git and env are now called on boot before everything else. without it,
+    popo will not have the ability to work.
+  * added boring README and CHANGELOG.
+
+  * version bump 0.1.9 -> 0.1.10
+
+  * added sourcing of rvm ps1_functions for ps1_set option
+
+  * removed deprecated targets folder
+
+  * poporc is now read from popo source and not from a manifest
+
+  * a customrc is now loaded if it is found under .manifest/script
+
+bug fixes
+  * fixed sync not being be able to update when path basename is equal
+    to app basename.
+
+  * changed parameters in order of importance

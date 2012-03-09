@@ -1,12 +1,12 @@
 module Popo
-  class Initializer
+  class Init
     include Constants
 
-    def self.boot(config, options, db)
-      self.new(config, options, db)
+    def self.boot(db, config, options)
+      self.new(db, config, options)
     end
 
-    def initialize(config, options, db)
+    def initialize(db, config, options)
       @options = options
       @db = db
       @manifest = config['manifests'][@options[:manifest]]

@@ -1,6 +1,6 @@
 module Popo
   class RVM
-    def initialize(app_root, args, db)
+    def initialize(db, app_root, args)
       @db = db
       @app_root = app_root
       @rvm_bin = File.join(@app_root, 'rvm/bin/rvm')

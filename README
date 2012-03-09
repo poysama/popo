@@ -1,1 +1,11 @@
-popo rails repo tool
+Popo Repo Tool
+
+Deploy your rails app
+
+Features:
+- Customizable manifest
+- Separate shell, rvm. No conflict worries
+- Easy on resources (RAM and CPU)
+- Integrated with cableguy to ease Rails configuration file deployment
+- Is best used when deploying and working with multiple Rails applications
+
