@@ -7,23 +7,23 @@ module Popo
       branch = 'master' if branch.nil?
 
       if clone_path.nil?
-        cmd = "#{GIT_CMD} clone -b #{branch} #{repo}"
+        cmd = "#{GIT_CMD} clone -b #{branch} #{repo} 2>&1"
       else
-        cmd = "#{GIT_CMD} clone -b #{branch} #{repo} #{clone_path}"
+        cmd = "#{GIT_CMD} clone -b #{branch} #{repo} #{clone_path} 2>&1"
       end
 
-      clone_msg = "Cloning branch #{branch} from #{repo}" +
-                  " to #{clone_path}"
-
-      Utils.say_with_time clone_msg do
+      Utils.git_say_with_time "CLONE".green, nil do
+        Utils.say "#{'[Source]'.yellow} => #{repo}", true
+        Utils.say "#{'[Target]'.yellow} => #{clone_path}", true
+        Utils.say "#{'[Branch]'.yellow} => #{branch}", true
        `#{cmd}`
       end
     end
 
     def self.git_update(repo, branch)
-      Utils.say_with_time "Updating #{repo}" do
+      Utils.git_say_with_time "FETCH".green, "#{repo}" do
         Dir.chdir(repo) do
-          `#{GIT_CMD} fetch`
+          `#{GIT_CMD} fetch 2>&1`
         end
       end
 
@@ -32,7 +32,7 @@ module Popo
     end
 
     def self.git_stash(repo)
-      Utils.say_with_time "Stashing changes for #{repo}" do
+      Utils.git_say_with_time "STASH".yellow, "#{repo}" do
         Dir.chdir(repo) do
           `#{GIT_CMD} stash`
         end
@@ -40,17 +40,19 @@ module Popo
     end
 
     def self.git_reset(repo, branch)
-      Utils.say_with_time "Doing a hard reset for #{repo}" do
+      Utils.git_say_with_time "RESET".red, "#{repo}" do
         Dir.chdir(repo) do
-          `#{GIT_CMD} reset --hard origin/#{branch}`
+          out = `#{GIT_CMD} reset --hard origin/#{branch} 2>&1`
+          Utils.say(out, true)
         end
       end
     end
 
     def self.git_checkout(repo, branch)
-      Utils.say_with_time "Switching to #{branch} branch" do
+      Utils.git_say_with_time "CHECKOUT".yellow, "#{branch} branch" do
         Dir.chdir(repo) do
-          `#{GIT_CMD} checkout #{branch}`
+          out = `#{GIT_CMD} checkout #{branch} 2>&1`
+          Utils.say(out, true)
         end
       end
     end
@@ -62,14 +64,14 @@ module Popo
 
         parsed = diff_msg.scan(/(commit [0-9a-f]+)\n+(.*?)\n+(.*?)(?:\n|$)/)
 
-        Utils.say "#{File.basename(cwd).capitalize}"
+        Utils.git_say "#{File.basename(cwd).capitalize}"
 
         parsed.each do |p|
           commit_id = p[0].gsub(/commit/,'').strip
           author = p[1].scan(/Author: (.*) <.*>/)
           commit_msg = p[2].strip
 
-          Utils.say "#{commit_id} \<#{author}\> #{commit_msg}", true
+          Utils.git_say "#{commit_id} \<#{author}\> #{commit_msg}", true
         end
       else
         repos = Dir.entries(cwd) - [ '.', '..' ]

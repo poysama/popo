@@ -1,18 +1,28 @@
 module Popo
   class RVM
-    def initialize(db, app_root, args)
-      @db = db
-      @app_root = app_root
-      @rvm_bin = File.join(@app_root, 'rvm/bin/rvm')
-      @repos = args
+    include Constants
 
-      @rubies = @db.get("rvm.rubies").split(",")
-      @default_ruby = @db.get("rvm.ruby.default")
-      @default_gems = @db.get_children("rvm.gems.default")
+    def initialize(runner)
+      @db       = runner.database
+      @repos    = runner.args
+      @rvm_bin  = File.join(runner.app_root, 'rvm/bin/rvm')
+      @app_root = runner.app_root
 
       if @db.has_key?("rvm.gems.source")
         @default_gem_source = @db.get("rvm.gems.source")
       end
+
+      get_rubies
+      set_rubies
+    end
+
+    def get_rubies
+      @rubies = @db.get("rvm.rubies").split(",")
+    end
+
+    def set_rubies
+      @default_ruby = @db.get("rvm.ruby.default")
+      @default_gems = @db.get_children("rvm.gems.default")
     end
 
     def setup
@@ -60,11 +70,4 @@ module Popo
       end
     end
   end
-
-POST_INSTALL_NOTE = <<NOTE
-You're almost done!\n
-Do the following inside popo:\n
-1. rvm reload\n
-NOTE
-
 end

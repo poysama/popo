@@ -2,22 +2,23 @@ module Popo
   class Sync
     include Constants
 
-    def initialize(db, popo_path, args)
-      @db = db
+    def initialize(runner)
+      @db        = runner.database
+      @cwd       = Dir.pwd
+      @info      = {}
+      @projects  = runner.args
+      @options   = runner.options
       @sync_list = @db.get(POPO_DIR_KEY).split(',')
-      @popo_path = popo_path
-      @cwd = Dir.pwd
-      @projects = args
-      @info = {}
+      @app_root = runner.app_root
     end
 
     def sync
       @projects.each do |project|
         if project =~ /\//
-          @info['key'] = convert_to_key(project)
-          @info['path'] = File.join(@popo_path, project)
+          @info[:key] = convert_to_key(project)
+          @info[:path] = File.join(@app_root, project)
 
-          get_values(@info['key'])
+          get_values(@info[:key])
 
           get_project
         else
@@ -26,11 +27,11 @@ module Popo
       end
 
       if @projects.empty?
-        if @cwd.eql? @popo_path
+        if @cwd.eql? @app_root
           @sync_list.each { |p| sync_all(p) }
         else
           key = @cwd.split('/')
-          key.shift(@popo_path.split('/').count)
+          key.shift(@app_root.split('/').count)
 
           sync_all(convert_to_key(key))
         end
@@ -46,38 +47,38 @@ module Popo
         end
 
         children.each do |c|
-          @info['key'] = [project, c].join('.')
+          @info[:key] = [project, c].join('.')
 
-          get_values(@info['key'])
+          get_values(@info[:key])
 
-          @info['path'] = File.join(@popo_path, project.gsub('.','/'), c)
+          @info[:path] = File.join(@app_root, project.gsub('.','/'), c)
 
           get_project
         end
       else
         get_values(project)
 
-        @info['path'] = File.join(@popo_path, project.gsub('.','/'))
+        @info[:path] = File.join(@app_root, project.gsub('.','/'))
 
         get_project
       end
     end
 
     def get_project
-      if !File.exists?(@info['path'])
-        GitUtils.git_clone(@info['repo'], @info['path'], @info['branch'])
+      if !File.exists?(@info[:path])
+        GitUtils.git_clone(@info[:repo], @info[:path], @info[:branch])
       else
-        if POPO_CONFIG['target'] == DEFAULT_POPO_TARGET
-          GitUtils.git_stash(@info['path'])
+        if POPO_CONFIG['target'] == DEFAULT_POPO_TARGET and !@options[:reset]
+          GitUtils.git_stash(@info[:path])
         end
 
-        GitUtils.git_update(@info['path'], @info['branch'])
+        GitUtils.git_update(@info[:path], @info[:branch])
       end
     end
 
     def get_values(key)
       POPO_KEY_VALUES.each do |v|
-        @info[v] = @db.get("#{key}.#{v}")
+        @info[v.to_sym] = @db.get("#{key}.#{v}")
       end
     end
 

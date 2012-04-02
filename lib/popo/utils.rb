@@ -4,8 +4,26 @@ module Popo
   module Utils
     include Constants
 
+    def self.colorize
+      String.class_eval do
+        include Popo::Constants
+
+        constants.grep(/^COLOR/).each do |c|
+          color = c.to_s.gsub('COLOR_','').downcase.to_sym
+
+          define_method color do
+            if !ENV['popo_no_color']
+              "#{Popo::Constants.const_get(c)}#{self}#{COLOR_NONE}"
+            else
+              self
+            end
+          end
+        end
+      end
+    end
+
     def self.say(message, subitem = false)
-      puts "#{subitem ? "   ->" : "--"} #{message}"
+      puts "#{subitem ? " \->" : "--"} #{message}"
     end
 
     def self.say_with_time(message)
@@ -16,6 +34,20 @@ module Popo
       say("#{result} rows", :subitem) if result.is_a?(Integer)
       result
     end
+
+    def self.git_say(action, message, subitem = false)
+      puts "#{subitem ? "\r->" : "\[#{action}\]"} #{message}"
+    end
+
+    def self.git_say_with_time(action, message)
+      git_say(action, message)
+      result = nil
+      time = Benchmark.measure { result = yield }
+      say "%.4fs" % time.real, :subitem
+      say("#{result} rows", :subitem) if result.is_a?(Integer)
+      result
+    end
+
 
     def self.in_popo?(root_path)
       if !ENV.include?('popo_path')
@@ -46,4 +78,3 @@ module Popo
     end
   end
 end
-

@@ -2,96 +2,67 @@ module Popo
   class Runner
     include Constants
 
-    def self.boot(args)
-      check_requirements
+    attr_reader :config
+    attr_reader :database, :db_opts
+    attr_reader :app_root, :args, :options
 
-      Popo::Constants.const_set("SHELL", ENV['SHELL'])
-
-      if SHELL.empty?
-        Error.say("SHELL is empty.")
+    class << self
+      def boot(args)
+        Utils.colorize
+        self.new(args) if has_requirements?
       end
 
-      self.new(args)
-    end
-
-    def self.check_requirements
-      bins = ['env', 'git' ]
-
-      bins.each do |b|
-        const_fn = "#{b.upcase}_CMD"
-
-        Popo::Constants.const_set(const_fn, get_bin_path(b))
-
-        if Popo::Constants.const_get(const_fn).empty?
-          Error.say "#{b} is needed and is not found in PATH!"
+      def has_requirements?
+        if ENV.include?('SHELL')
+          Popo::Constants.const_set("SHELL", ENV['SHELL'])
+        else
+          Error.say("SHELL is empty.")
         end
-      end
-    end
 
-    def self.get_bin_path(bin)
-      `which #{bin}`.strip
+        Popo::Constants::REQUIRED_COMMANDS.each do |b|
+          const_fn = "#{b.upcase}_CMD"
+
+          Popo::Constants.const_set(const_fn, get_bin_path(b))
+
+          if Popo::Constants.const_get(const_fn).empty?
+            Error.say "#{b} is needed and is not found in PATH!"
+          end
+        end
+
+        true
+      end
+
+      def get_bin_path(bin)
+        `which #{bin}`.strip
+      end
     end
 
     def initialize(args)
-      @db_opts           = {}
-      @options           = {}
-      @app_root          = ENV['popo_path'] || Dir.pwd
-      @options[:verbose] = false
+      @args     = args
+      @db_opts  = {}
+      @options  = {}
+      @app_root = ENV['popo_path'] || Dir.pwd
 
       if Utils.has_popo_config?(@app_root)
         @options[:target] = POPO_CONFIG['target']
       end
 
-      optparse = OptionParser.new do |opts|
-        opts.banner = "Popo tool."
-        opts.separator "Options:"
+      opt = OptParse.new
 
-        opts.on('-p', '--path PATH', 'Target path') do |path|
-          @options[:path] = path
-        end
+      if @args.length >= 1
+        opt.optparse.parse!
+        @options.merge!(opt.options)
 
-        opts.on('-t', '--target TARGET', 'Deployment target') do |target|
-          @options[:target] = target
-        end
+        db_options = {
+          :path => File.join(@app_root, POPO_WORK_PATH),
+          :target => ENV['CABLING_TARGET'] || @options[:target] || DEFAULT_POPO_TARGET,
+          :verbose => @options[:verbose],
+          :location => ENV['CABLING_LOCATION'] || @options[:location]
+        }
 
-        opts.on('-u', '--user USER', 'Username') do |user|
-          @options[:user] = user
-        end
+        @db_opts.merge!(db_options)
 
-        opts.on('-m', '--manifest MANIFEST', 'Manifest') do |manifest|
-          @options[:manifest] = manifest
-        end
-
-        opts.on('-l', '--location LOCATION', 'Location') do |location|
-          @options[:location] = location
-        end
-
-        opts.on('-v', '--verbose', 'Verbose') do
-          @options[:verbose] = true
-        end
-
-        opts.on('-V', '--version', 'Version') do
-          puts Popo::VERSION
-          exit
-        end
-
-        opts.on('-h', '--help', 'Display this screen') do
-          puts opts
-          exit
-        end
-      end
-
-      optparse.parse!
-
-      if args.length < 1
-        Utils.say optparse.help
-      else
-        @db_opts[:path]     = File.join(@app_root, POPO_WORK_PATH)
-        @db_opts[:target]   = ENV['CABLING_TARGET'] || @options[:target] || DEFAULT_POPO_TARGET
-        @db_opts[:verbose]  = @options[:verbose]
-        @db_opts[:location] = ENV['CABLING_LOCATION'] || @options[:location]
-
-        # set manifest usable constants
+        # let set these so we can use them in migration files
         Object.const_set("POPO_PATH", @app_root)
         Object.const_set("POPO_USER", @options[:user])
         Object.const_set("POPO_TARGET", @db_opts[:target])
@@ -100,16 +71,18 @@ module Popo
         mandatory = [:path, :manifest]
         mandatory = mandatory.select { |p| @options[p].nil? }
 
-        if args.first == 'init' and !mandatory.empty?
-          Error.say "Missing options: #{mandatory.join(', ')}"
+        if @args.first.eql? 'init' and !mandatory.empty?
+          Error.say "Required options: #{mandatory.join(', ')}"
         end
 
-        self.run(args)
+        run
+      else
+        Utils.say opt.optparse.help
       end
     end
 
-    def run(args)
-      if POPO_COMMANDS.include?(args.first)
+    def run
+      if POPO_COMMANDS.include?(@args.first)
         Utils.in_popo?(@app_root)
       end
 
@@ -117,31 +90,44 @@ module Popo
 
       case cmd
       when 'init'
-        config = get_config!
+        @config = get_config!
 
-        if config['manifests'][@options[:manifest]].nil?
+        if @config['manifests'][@options[:manifest]].nil?
           Error.say "\'#{@options[:manifest]}\' does not exist in #{DEFAULT_CONFIG_FILE}!"
         end
 
         if !File.exist?(File.join(@app_root, @options[:path]))
           @db_opts[:path] = File.join(@app_root, @options[:path], POPO_WORK_PATH)
-          db = get_database
+          get_database
 
-          Init.boot(db, config, @options).setup
+          Init.boot(self).setup
         else
           Error.say "Path \'#{@options[:path]}\' already exists!"
         end
       when 'sync'
-        db = get_database
+        get_database
 
-        Sync.new(db, @app_root, args).sync
+        Sync.new(self).sync
       when 'rvm'
-        db = get_database
+        get_database
 
-        RVM.new(db, @app_root, args).setup
+        RVM.new(self).setup
+      when 'update'
+        manifest_path = File.join(@app_root, POPO_WORK_PATH)
+
+        case POPO_TARGET
+        when DEFAULT_POPO_TARGET
+          GitUtils.git_update(manifest_path, DEFAULT_POPO_TARGET)
+        else
+          GitUtils.git_update(manifest_path, 'master')
+        end
+
+        get_database
+        @database.migrate_database
       when 'migrate'
-        get_database.migrate_database
-      when 'status'
+        get_database
+        @database.migrate_database
+      when 'info'
         Utils.say `cat #{File.join(@app_root, POPO_WORK_PATH, POPO_YML_FILE)}`
       when 'shell', 'bash'
         sh!
@@ -152,7 +138,7 @@ module Popo
       end
     end
 
-    protected
+    private
 
     def sh!
       if Utils.has_popo_config?(@app_root)
@@ -184,10 +170,8 @@ module Popo
     end
 
     def get_database
-      database = Database.new(@app_root, @db_opts)
-      database.boot_database
-
-      database
+      @database = Database.new(@app_root, @db_opts)
+      @database.boot_database
     end
 
     def get_config!

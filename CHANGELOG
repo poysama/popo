@@ -1,6 +1,34 @@
--- 0.1.10
+-- 1.0.0
+  * added popo update. this updates the manifest to respective branch and remigrates your
+    manifest data
 
-features
+  * optparse separated
+
+  * interactive popo now displays colors for eye candy
+
+  * the runner is now passed to each command
+
+  * version bump
+
+  * a copy of ps1_functions scripts is now automatically sourced by poporc. if you're a fan of
+    changing your prompt with ps1_set, then you can call this inside popo.
+    remember that this will unset any PROMPT_COMMAND sourced before popo loads.
+    this means that any ps1_set or PROMPT_COMMAND defined and sourced in your local RVM will be gone.
+    this measure is to enforce prefixing your ps1 with the popo prompt to distinguish what world
+    you are in so that you will not be in limbo.
+
+  * ps1 functions in zsh are still not supported. sorry!
+
+  * for those who aren't familiar or interested with ps1_functions, you may visit
+    https://rvm.io/workflow/prompt/
+
+  * for CI, since colors render as pure text, you can export popo_no_color=true to your CI server.
+    this will disable the eye candy.
+
+bug fixes
+  * changed some variable names for more readability
+
+-- 0.1.10
   * popo bash is now popo shell. bash still works though. just changed
     underlying code to be more generic
 

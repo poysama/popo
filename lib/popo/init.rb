@@ -2,17 +2,16 @@ module Popo
   class Init
     include Constants
 
-    def self.boot(db, config, options)
-      self.new(db, config, options)
+    def self.boot(runner)
+      self.new(runner)
     end
 
-    def initialize(db, config, options)
-      @options = options
-      @db = db
-      @manifest = config['manifests'][@options[:manifest]]
-      @default_target = @options[:target] || 'development'
-      @deploy_path = File.absolute_path(@options[:path])
+    def initialize(runner)
+      @db = runner.database
+      @options = runner.options
       @location = @options[:location] || nil
+      @manifest = runner.config['manifests'][@options[:manifest]]
+      @deploy_path = File.absolute_path(@options[:path])
     end
 
     def print_variables
@@ -43,7 +42,7 @@ module Popo
 
     def write_config
       popo = {}
-      popo['target'] = @default_target
+      popo['target'] = DEFAULT_POPO_TARGET
       popo['path'] = @deploy_path
       popo['location'] = @location if !@location.nil?
 

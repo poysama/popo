@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 if [[ -z "$popo_path" ]] ; then
   echo "FAIL Please set the popo_path environment var"
   exit -1
@@ -9,62 +10,78 @@ if [[ -z "$popo_target" ]] ; then
   exit -1
 fi
 
-YELLOW="\[\033[33m\]"
-NORMAL="\[\033[0;0m\]"
-BASEPATH=`which basename`
-BASENAME=`$BASEPATH $popo_path`
-CUSTOMRC=$popo_path/.manifest/script/customrc
-
-export rvm_prefix=$popo_path
+# remove all rvm paths
 unset $(env | awk -F= '/^rvm_/{print $1" "}')
-export rvm_path=$popo_path/rvm
-source $rvm_path/scripts/rvm
-source $rvm_path/contrib/ps1_functions
+
+# variables
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+basename=`which basename`
+path_basename=`$basename $popo_path`
+customrc=$popo_path/.manifest/script/customrc
+
+# load self contained rvm
+rvm_prefix=$popo_path
+rvm_path=$popo_path/rvm
 rubies_path=$rvm_path/rubies
 
-# Load default rvm if rubies folder is not empty
+# load all relative rvm scripts
+source $rvm_path/scripts/rvm
+
+# load default rvm if rubies folder is not empty
 if [ -d $rubies_path ] && [ "$(ls -A $rubies_path)" ] ; then
   rvm default
 fi
-
-unset PALMADE_GEMS_DIR
-export PATH="$rvm_path/bin:$popo_path/tools:$PATH"
 
 if [[ $PS1 != "" ]] ; then
   if [[ -f /etc/bash.bashrc ]] ; then
     source /etc/bash.bashrc
   fi
 
+  if [[ -f /etc/bashrc ]] ; then
+    source /etc/bashrc
+  fi
+
   if [[ -f $HOME/.bashrc ]] ; then
     source $HOME/.bashrc
   fi
 
-  if [[ $BASENAME != $popo_target ]] ; then
-    export PS1="$YELLOW(popo $popo_target/$BASENAME) $NORMAL$PS1"
-  else
-    export PS1="$YELLOW(popo $popo_target) $NORMAL$PS1"
+  if [[ `uname` == 'Darwin' && -f $HOME/.bash_profile ]] ; then
+    source $HOME/.bash_profile
   fi
+
+  if [[ $path_basename != $popo_target ]] ; then
+    popo_ps1="\[\033[1;33m\][popo $popo_target/$path_basename] \[\033[0m\]"
+  else
+    popo_ps1="\[\033[0;33m\][popo $popo_target] \[\033[0m\]"
+  fi
+
+  PS1="$popo_ps1 $PS1"
 fi
+
+# lets unset PROMPT_COMMAND. We use our own PS1!
+unset PROMPT_COMMAND
+
+# source popo ps1 functions
+source $scriptdir/ps1_functions
 
 rvm reload
 
 if [[ -z "$PS1" ]] ; then
 	rvm $*
 else
-    echo "Welcome to the popoed environment, where you can play with your very own popo."
-    echo ""
-    echo "Popo has set these variables for you lazy ass people".
-    echo "  popo_path:   $popo_path"
-    echo "  popo_target: $popo_target"
-    echo ""
-    echo "Remember to keep things clean and civil around here."
-    echo "To go back to your normal world, just hit exit."
-    echo ""
-    echo "But wait, you ask, who needs popo? Baahh, popo's for n00bs!"
-    echo ""
+  echo "Welcome to the popoed environment, where you can play with your very own popo."
+   echo ""
+   echo "  popo_path:   $popo_path"
+   echo "  popo_target: $popo_target"
+   echo ""
+   echo "Remember to keep things clean and civil around here."
+   echo "To go back to your normal world, just hit exit."
+   echo ""
+   echo "But wait, you ask, who needs popo? Baahh, popo's for n00bs!"
+   echo ""
 fi
 
 # source a custom rc file
-if [[ -s $CUSTOMRC ]] ; then
-  source $CUSTOMRC
+if [[ -s $customrc ]] ; then
+  source $customrc
 fi
