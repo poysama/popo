@@ -1,4 +1,13 @@
--- 1.0.0
+-- 0.2.1
+  * removed extra spaces on prompt
+
+  * downcased git actions
+
+  * changed colors to a darker shade for light terminals
+
+  * version bump to 0.2.1
+
+-- 0.2.0
   * added popo update. this updates the manifest to respective branch and remigrates your
     manifest data
 

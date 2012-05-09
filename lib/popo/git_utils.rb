@@ -12,7 +12,7 @@ module Popo
         cmd = "#{GIT_CMD} clone -b #{branch} #{repo} #{clone_path} 2>&1"
       end
 
-      Utils.git_say_with_time "CLONE".green, nil do
+      Utils.git_say_with_time "clone".green, nil do
         Utils.say "#{'[Source]'.yellow} => #{repo}", true
         Utils.say "#{'[Target]'.yellow} => #{clone_path}", true
         Utils.say "#{'[Branch]'.yellow} => #{branch}", true
@@ -21,7 +21,7 @@ module Popo
     end
 
     def self.git_update(repo, branch)
-      Utils.git_say_with_time "FETCH".green, "#{repo}" do
+      Utils.git_say_with_time "fetch".green, "#{repo}" do
         Dir.chdir(repo) do
           `#{GIT_CMD} fetch 2>&1`
         end
@@ -32,7 +32,7 @@ module Popo
     end
 
     def self.git_stash(repo)
-      Utils.git_say_with_time "STASH".yellow, "#{repo}" do
+      Utils.git_say_with_time "stash".yellow, "#{repo}" do
         Dir.chdir(repo) do
           `#{GIT_CMD} stash`
         end
@@ -40,7 +40,7 @@ module Popo
     end
 
     def self.git_reset(repo, branch)
-      Utils.git_say_with_time "RESET".red, "#{repo}" do
+      Utils.git_say_with_time "reset".red, "#{repo}" do
         Dir.chdir(repo) do
           out = `#{GIT_CMD} reset --hard origin/#{branch} 2>&1`
           Utils.say(out, true)
@@ -49,7 +49,7 @@ module Popo
     end
 
     def self.git_checkout(repo, branch)
-      Utils.git_say_with_time "CHECKOUT".yellow, "#{branch} branch" do
+      Utils.git_say_with_time "checkout".yellow, "#{branch} branch" do
         Dir.chdir(repo) do
           out = `#{GIT_CMD} checkout #{branch} 2>&1`
           Utils.say(out, true)

@@ -12,10 +12,10 @@ module Popo
     REQUIRED_COMMANDS   = %w(git env)
 
     # colors
-    COLOR_RED     = "\e[1;31m"
-    COLOR_GREEN   = "\e[1;32m"
-    COLOR_YELLOW  = "\e[1;33m"
-    COLOR_NONE    = "\e[1;0m"
+    COLOR_RED     = "\033[0;31m"
+    COLOR_GREEN   = "\033[0;32m"
+    COLOR_YELLOW  = "\033[0;33m"
+    COLOR_NONE    = "\033[0;0m"
 
     POST_INSTALL_NOTE = <<NOTE
 You're almost done!\n
