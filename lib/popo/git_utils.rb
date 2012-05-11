@@ -7,15 +7,15 @@ module Popo
       branch = 'master' if branch.nil?
 
       if clone_path.nil?
-        cmd = "#{GIT_CMD} clone -b #{branch} #{repo} 2>&1"
+        cmd = "#{GIT_CMD} clone -b #{branch} #{repo}"
       else
-        cmd = "#{GIT_CMD} clone -b #{branch} #{repo} #{clone_path} 2>&1"
+        cmd = "#{GIT_CMD} clone -b #{branch} #{repo} #{clone_path}"
       end
 
       Utils.git_say_with_time "clone".green, nil do
-        Utils.say "#{'[Source]'.yellow} => #{repo}", true
-        Utils.say "#{'[Target]'.yellow} => #{clone_path}", true
-        Utils.say "#{'[Branch]'.yellow} => #{branch}", true
+        Utils.say "#{'source'.yellow} #{repo}", true
+        Utils.say "#{'target'.yellow} #{clone_path}", true
+        Utils.say "#{'branch'.yellow} #{branch}", true
        `#{cmd}`
       end
     end
