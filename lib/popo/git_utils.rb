@@ -64,7 +64,7 @@ module Popo
 
         parsed = diff_msg.scan(/(commit [0-9a-f]+)\n+(.*?)\n+(.*?)(?:\n|$)/)
 
-        Utils.git_say "#{File.basename(cwd).capitalize}"
+        Utils.git_say "diff".yellow, "#{File.basename(cwd).capitalize}"
 
         parsed.each do |p|
           commit_id = p[0].gsub(/commit/,'').strip
@@ -74,9 +74,10 @@ module Popo
           Utils.git_say "#{commit_id} \<#{author}\> #{commit_msg}", true
         end
       else
-        repos = Dir.entries(cwd) - [ '.', '..' ]
+        repos = Dir.glob("#{cwd}/*")
 
         repos.each do |r|
+          r = File.basename(r)
           if File.directory?(r)
             FileUtils.cd(r) { branch_diff(File.join(cwd, r)) }
           end
