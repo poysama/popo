@@ -64,6 +64,8 @@ module Popo
 
         parsed = diff_msg.scan(/(commit [0-9a-f]+)\n+(.*?)\n+(.*?)(?:\n|$)/)
 
+        return if parsed.empty?
+
         Utils.git_say "diff".yellow, "#{File.basename(cwd).capitalize}"
 
         parsed.each do |p|
