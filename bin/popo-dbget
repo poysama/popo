@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+begin
+  Gem::Specification.find_by_name('dbget_client', '0.2.2')
+  require 'dbget_client'
+rescue Gem::LoadError
+  p "Missing required gem. Install dbget_client >= 0.2.2"
+  exit 1
+end
+
+p "A CABLING_TARGET is not defined!" and exit unless ENV.include?('CABLING_TARGET')
+
+DbgetClient::Runner.new({:suffix => ENV['CABLING_TARGET']}).run!(ARGV, 'mysql')
