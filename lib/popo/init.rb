@@ -42,7 +42,7 @@ module Popo
 
     def write_config
       popo = {}
-      popo['target'] = DEFAULT_POPO_TARGET
+      popo['target'] = @options[:target] || DEFAULT_POPO_TARGET
       popo['path'] = @deploy_path
       popo['location'] = @location if !@location.nil?
 
