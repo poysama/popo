@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 
+REQUIRED_VERSION = ">=0.2.3"
+
 begin
-  Gem::Specification.find_by_name('dbget_client', '0.2.2')
+  Gem::Specification.find_by_name('dbget_client', REQUIRED_VERSION)
   require 'dbget_client'
 rescue Gem::LoadError
-  p "Missing required gem. Install dbget_client >= 0.2.2"
+  p "Missing required gem. Install dbget_client #{REQUIRED_VERSION}"
   exit 1
 end
 
