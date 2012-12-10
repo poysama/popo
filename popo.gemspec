@@ -11,9 +11,8 @@ Gem::Specification.new do |s|
   s.summary     = %q{Popo ruby and rails repo tool}
   s.description = %q{Ruby and rails repo tool}
 
-  s.add_dependency "sequel"
-  s.add_dependency "sqlite3"
   s.add_dependency "cableguy"
+  s.add_dependency "thor"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
